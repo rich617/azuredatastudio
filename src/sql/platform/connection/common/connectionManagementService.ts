@@ -41,7 +41,7 @@ import { IEditorService, ACTIVE_GROUP } from 'vs/workbench/services/editor/commo
 import * as platform from 'vs/platform/registry/common/platform';
 import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
 import { ConnectionProfileGroup, IConnectionProfileGroup } from 'sql/platform/connection/common/connectionProfileGroup';
-import { Event, Emitter } from 'vs/base/common/event';
+import { Emitter } from 'vs/base/common/event';
 import { IQuickInputService } from 'vs/platform/quickinput/common/quickInput';
 import { IConnectionDialogService } from 'sql/workbench/services/connection/common/connectionDialogService';
 import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
@@ -59,54 +59,56 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	private _providers = new Map<string, { onReady: Promise<azdata.ConnectionProvider>, properties: ConnectionProviderProperties }>();
 	private _iconProviders = new Map<string, azdata.IconProvider>();
 	private _uriToProvider: { [uri: string]: string; } = Object.create(null);
-	private _onAddConnectionProfile = new Emitter<IConnectionProfile>();
-	private _onDeleteConnectionProfile = new Emitter<void>();
-	private _onConnect = new Emitter<IConnectionParams>();
-	private _onDisconnect = new Emitter<IConnectionParams>();
-	private _onConnectRequestSent = new Emitter<void>();
-	private _onConnectionChanged = new Emitter<IConnectionParams>();
-	private _onLanguageFlavorChanged = new Emitter<azdata.DidChangeLanguageFlavorParams>();
 	private _connectionGlobalStatus = new ConnectionGlobalStatus(this._notificationService);
+	private _connectionStore = this._instantiationService.createInstance(ConnectionStore);
+	private _connectionStatusManager = new ConnectionStatusManager(this._capabilitiesService, this._logService, this._environmentService, this._notificationService);
+
+	private readonly _onAddConnectionProfile = this._register(new Emitter<IConnectionProfile>());
+	public readonly onAddConnectionProfile = this._onAddConnectionProfile.event;
+
+	private readonly _onDeleteConnectionProfile = this._register(new Emitter<void>());
+	public readonly onDeleteConnectionProfile = this._onDeleteConnectionProfile.event;
+
+	private readonly _onConnect = this._register(new Emitter<IConnectionParams>());
+	public readonly onConnect = this._onConnect.event;
+
+	private readonly _onDisconnect = this._register(new Emitter<IConnectionParams>());
+	public readonly onDisconnect = this._onDisconnect.event;
+
+	private readonly _onConnectionChanged = this._register(new Emitter<IConnectionParams>());
+	public readonly onConnectionChanged = this._onConnectionChanged.event;
+
+	private readonly _onLanguageFlavorChanged = this._register(new Emitter<azdata.DidChangeLanguageFlavorParams>());
+	public readonly onLanguageFlavorChanged = this._onLanguageFlavorChanged.event;
 
 	private _mementoContext: Memento;
 	private _mementoObj: any;
 	private static readonly CONNECTION_MEMENTO = 'ConnectionManagement';
 
 	constructor(
-		private _connectionStore: ConnectionStore,
-		private _connectionStatusManager: ConnectionStatusManager,
-		@IConnectionDialogService private _connectionDialogService: IConnectionDialogService,
-		@IInstantiationService private _instantiationService: IInstantiationService,
-		@IEditorService private _editorService: IEditorService,
-		@ITelemetryService private _telemetryService: ITelemetryService,
-		@IConfigurationService private _configurationService: IConfigurationService,
-		@ICapabilitiesService private _capabilitiesService: ICapabilitiesService,
-		@IQuickInputService private _quickInputService: IQuickInputService,
-		@INotificationService private _notificationService: INotificationService,
-		@IResourceProviderService private _resourceProviderService: IResourceProviderService,
-		@IAngularEventingService private _angularEventing: IAngularEventingService,
-		@IAccountManagementService private _accountManagementService: IAccountManagementService,
-		@ILogService private _logService: ILogService,
-		@IStorageService private _storageService: IStorageService,
-		@IEnvironmentService private _environmentService: IEnvironmentService
+		@IConnectionDialogService private readonly _connectionDialogService: IConnectionDialogService,
+		@IInstantiationService private readonly _instantiationService: IInstantiationService,
+		@IEditorService private readonly _editorService: IEditorService,
+		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
+		@ICapabilitiesService private readonly _capabilitiesService: ICapabilitiesService,
+		@IQuickInputService private readonly _quickInputService: IQuickInputService,
+		@INotificationService private readonly _notificationService: INotificationService,
+		@IResourceProviderService private readonly _resourceProviderService: IResourceProviderService,
+		@IAngularEventingService private readonly _angularEventing: IAngularEventingService,
+		@IAccountManagementService private readonly _accountManagementService: IAccountManagementService,
+		@ILogService private readonly _logService: ILogService,
+		@IStorageService private readonly _storageService: IStorageService,
+		@IEnvironmentService private readonly _environmentService: IEnvironmentService
 	) {
 		super();
 
-		if (!this._connectionStore) {
-			this._connectionStore = _instantiationService.createInstance(ConnectionStore);
-		}
-		if (!this._connectionStatusManager) {
-			this._connectionStatusManager = new ConnectionStatusManager(this._capabilitiesService, this._logService, this._environmentService, this._notificationService);
-		}
-
-		if (this._storageService) {
-			this._mementoContext = new Memento(ConnectionManagementService.CONNECTION_MEMENTO, this._storageService);
-			this._mementoObj = this._mementoContext.getMemento(StorageScope.GLOBAL);
-		}
+		this._mementoContext = new Memento(ConnectionManagementService.CONNECTION_MEMENTO, this._storageService);
+		this._mementoObj = this._mementoContext.getMemento(StorageScope.GLOBAL);
 
 		const registry = platform.Registry.as<IConnectionProviderRegistry>(ConnectionProviderExtensions.ConnectionProviderContributions);
 
-		let providerRegistration = (p: { id: string, properties: ConnectionProviderProperties }) => {
+		const providerRegistration = (p: { id: string, properties: ConnectionProviderProperties }) => {
 			let provider = {
 				onReady: new Deferred<azdata.ConnectionProvider>(),
 				properties: p.properties
@@ -114,46 +116,14 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 			this._providers.set(p.id, provider);
 		};
 
-		registry.onNewProvider(providerRegistration, this);
+		this._register(registry.onNewProvider(providerRegistration, this));
 		entries(registry.providers).map(v => {
 			providerRegistration({ id: v[0], properties: v[1] });
 		});
-
-		this._register(this._onAddConnectionProfile);
-		this._register(this._onDeleteConnectionProfile);
 	}
 
 	public providerRegistered(providerId: string): boolean {
 		return !!this._providers.get(providerId);
-	}
-
-	// Event Emitters
-	public get onAddConnectionProfile(): Event<IConnectionProfile> {
-		return this._onAddConnectionProfile.event;
-	}
-
-	public get onDeleteConnectionProfile(): Event<void> {
-		return this._onDeleteConnectionProfile.event;
-	}
-
-	public get onConnect(): Event<IConnectionParams> {
-		return this._onConnect.event;
-	}
-
-	public get onDisconnect(): Event<IConnectionParams> {
-		return this._onDisconnect.event;
-	}
-
-	public get onConnectionChanged(): Event<IConnectionParams> {
-		return this._onConnectionChanged.event;
-	}
-
-	public get onConnectionRequestSent(): Event<void> {
-		return this._onConnectRequestSent.event;
-	}
-
-	public get onLanguageFlavorChanged(): Event<azdata.DidChangeLanguageFlavorParams> {
-		return this._onLanguageFlavorChanged.event;
 	}
 
 	// Connection Provider Registration
@@ -610,7 +580,6 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 
 		return this._providers.get(connection.providerName).onReady.then((provider) => {
 			provider.connect(uri, connectionInfo);
-			this._onConnectRequestSent.fire();
 
 			// TODO make this generic enough to handle non-SQL languages too
 			this.doChangeLanguageFlavor(uri, 'sql', connection.providerName);
