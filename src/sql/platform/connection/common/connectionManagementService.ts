@@ -49,7 +49,6 @@ import { ILogService } from 'vs/platform/log/common/log';
 import * as interfaces from './interfaces';
 import { IStorageService, StorageScope } from 'vs/platform/storage/common/storage';
 import { Memento } from 'vs/workbench/common/memento';
-import { IEnvironmentService } from 'vs/platform/environment/common/environment';
 import { INotificationService } from 'vs/platform/notification/common/notification';
 
 export class ConnectionManagementService extends Disposable implements IConnectionManagementService {
@@ -59,50 +58,41 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	private _providers = new Map<string, { onReady: Promise<azdata.ConnectionProvider>, properties: ConnectionProviderProperties }>();
 	private _iconProviders = new Map<string, azdata.IconProvider>();
 	private _uriToProvider: { [uri: string]: string; } = Object.create(null);
-	private _onAddConnectionProfile = new Emitter<IConnectionProfile>();
-	private _onDeleteConnectionProfile = new Emitter<void>();
-	private _onConnect = new Emitter<IConnectionParams>();
-	private _onDisconnect = new Emitter<IConnectionParams>();
-	private _onConnectRequestSent = new Emitter<void>();
-	private _onConnectionChanged = new Emitter<IConnectionParams>();
-	private _onLanguageFlavorChanged = new Emitter<azdata.DidChangeLanguageFlavorParams>();
 	private _connectionGlobalStatus = new ConnectionGlobalStatus(this._notificationService);
+
+	private _onAddConnectionProfile = this._register(new Emitter<IConnectionProfile>());
+	private _onDeleteConnectionProfile = this._register(new Emitter<void>());
+	private _onConnect = this._register(new Emitter<IConnectionParams>());
+	private _onDisconnect = this._register(new Emitter<IConnectionParams>());
+	private _onConnectRequestSent = this._register(new Emitter<void>());
+	private _onConnectionChanged = this._register(new Emitter<IConnectionParams>());
+	private _onLanguageFlavorChanged = this._register(new Emitter<azdata.DidChangeLanguageFlavorParams>());
 
 	private _mementoContext: Memento;
 	private _mementoObj: any;
 	private static readonly CONNECTION_MEMENTO = 'ConnectionManagement';
+	private readonly _connectionStore = this._instantiationService.createInstance(ConnectionStore);
+	private readonly _connectionStatusManager = this._instantiationService.createInstance(ConnectionStatusManager);
 
 	constructor(
-		private _connectionStore: ConnectionStore,
-		private _connectionStatusManager: ConnectionStatusManager,
-		@IConnectionDialogService private _connectionDialogService: IConnectionDialogService,
-		@IInstantiationService private _instantiationService: IInstantiationService,
-		@IEditorService private _editorService: IEditorService,
-		@ITelemetryService private _telemetryService: ITelemetryService,
-		@IConfigurationService private _configurationService: IConfigurationService,
-		@ICapabilitiesService private _capabilitiesService: ICapabilitiesService,
-		@IQuickInputService private _quickInputService: IQuickInputService,
-		@INotificationService private _notificationService: INotificationService,
-		@IResourceProviderService private _resourceProviderService: IResourceProviderService,
-		@IAngularEventingService private _angularEventing: IAngularEventingService,
-		@IAccountManagementService private _accountManagementService: IAccountManagementService,
-		@ILogService private _logService: ILogService,
-		@IStorageService private _storageService: IStorageService,
-		@IEnvironmentService private _environmentService: IEnvironmentService
+		@IConnectionDialogService private readonly _connectionDialogService: IConnectionDialogService,
+		@IInstantiationService private readonly _instantiationService: IInstantiationService,
+		@IEditorService private readonly _editorService: IEditorService,
+		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService,
+		@ICapabilitiesService private readonly _capabilitiesService: ICapabilitiesService,
+		@IQuickInputService private readonly _quickInputService: IQuickInputService,
+		@INotificationService private readonly _notificationService: INotificationService,
+		@IResourceProviderService private readonly _resourceProviderService: IResourceProviderService,
+		@IAngularEventingService private readonly _angularEventing: IAngularEventingService,
+		@IAccountManagementService private readonly _accountManagementService: IAccountManagementService,
+		@ILogService private readonly _logService: ILogService,
+		@IStorageService private readonly _storageService: IStorageService
 	) {
 		super();
 
-		if (!this._connectionStore) {
-			this._connectionStore = _instantiationService.createInstance(ConnectionStore);
-		}
-		if (!this._connectionStatusManager) {
-			this._connectionStatusManager = new ConnectionStatusManager(this._capabilitiesService, this._logService, this._environmentService, this._notificationService);
-		}
-
-		if (this._storageService) {
-			this._mementoContext = new Memento(ConnectionManagementService.CONNECTION_MEMENTO, this._storageService);
-			this._mementoObj = this._mementoContext.getMemento(StorageScope.GLOBAL);
-		}
+		this._mementoContext = new Memento(ConnectionManagementService.CONNECTION_MEMENTO, this._storageService);
+		this._mementoObj = this._mementoContext.getMemento(StorageScope.GLOBAL);
 
 		const registry = platform.Registry.as<IConnectionProviderRegistry>(ConnectionProviderExtensions.ConnectionProviderContributions);
 
@@ -114,13 +104,8 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 			this._providers.set(p.id, provider);
 		};
 
-		registry.onNewProvider(providerRegistration, this);
-		entries(registry.providers).map(v => {
-			providerRegistration({ id: v[0], properties: v[1] });
-		});
-
-		this._register(this._onAddConnectionProfile);
-		this._register(this._onDeleteConnectionProfile);
+		this._register(registry.onNewProvider(providerRegistration, this));
+		entries(registry.providers).map(v => providerRegistration({ id: v[0], properties: v[1] }));
 	}
 
 	public providerRegistered(providerId: string): boolean {
