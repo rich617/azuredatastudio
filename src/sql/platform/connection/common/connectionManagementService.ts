@@ -41,7 +41,7 @@ import { IEditorService, ACTIVE_GROUP } from 'vs/workbench/services/editor/commo
 import * as platform from 'vs/platform/registry/common/platform';
 import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
 import { ConnectionProfileGroup, IConnectionProfileGroup } from 'sql/platform/connection/common/connectionProfileGroup';
-import { Event, Emitter } from 'vs/base/common/event';
+import { Emitter } from 'vs/base/common/event';
 import { IQuickInputService } from 'vs/platform/quickinput/common/quickInput';
 import { IConnectionDialogService } from 'sql/workbench/services/connection/common/connectionDialogService';
 import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
@@ -59,6 +59,26 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	private _iconProviders = new Map<string, azdata.IconProvider>();
 	private _uriToProvider: { [uri: string]: string; } = Object.create(null);
 	private _connectionGlobalStatus = new ConnectionGlobalStatus(this._notificationService);
+	private _connectionStore = this._instantiationService.createInstance(ConnectionStore);
+	private _connectionStatusManager = new ConnectionStatusManager(this._capabilitiesService, this._logService, this._environmentService, this._notificationService);
+
+	private readonly _onAddConnectionProfile = this._register(new Emitter<IConnectionProfile>());
+	public readonly onAddConnectionProfile = this._onAddConnectionProfile.event;
+
+	private readonly _onDeleteConnectionProfile = this._register(new Emitter<void>());
+	public readonly onDeleteConnectionProfile = this._onDeleteConnectionProfile.event;
+
+	private readonly _onConnect = this._register(new Emitter<IConnectionParams>());
+	public readonly onConnect = this._onConnect.event;
+
+	private readonly _onDisconnect = this._register(new Emitter<IConnectionParams>());
+	public readonly onDisconnect = this._onDisconnect.event;
+
+	private readonly _onConnectionChanged = this._register(new Emitter<IConnectionParams>());
+	public readonly onConnectionChanged = this._onConnectionChanged.event;
+
+	private readonly _onLanguageFlavorChanged = this._register(new Emitter<azdata.DidChangeLanguageFlavorParams>());
+	public readonly onLanguageFlavorChanged = this._onLanguageFlavorChanged.event;
 
 	private _onAddConnectionProfile = this._register(new Emitter<IConnectionProfile>());
 	private _onDeleteConnectionProfile = this._register(new Emitter<void>());
@@ -87,7 +107,8 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 		@IAngularEventingService private readonly _angularEventing: IAngularEventingService,
 		@IAccountManagementService private readonly _accountManagementService: IAccountManagementService,
 		@ILogService private readonly _logService: ILogService,
-		@IStorageService private readonly _storageService: IStorageService
+		@IStorageService private readonly _storageService: IStorageService,
+		@IEnvironmentService private readonly _environmentService: IEnvironmentService
 	) {
 		super();
 
@@ -96,7 +117,7 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 
 		const registry = platform.Registry.as<IConnectionProviderRegistry>(ConnectionProviderExtensions.ConnectionProviderContributions);
 
-		let providerRegistration = (p: { id: string, properties: ConnectionProviderProperties }) => {
+		const providerRegistration = (p: { id: string, properties: ConnectionProviderProperties }) => {
 			let provider = {
 				onReady: new Deferred<azdata.ConnectionProvider>(),
 				properties: p.properties
@@ -111,37 +132,6 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	public providerRegistered(providerId: string): boolean {
 		return !!this._providers.get(providerId);
 	}
-
-	// Event Emitters
-	public get onAddConnectionProfile(): Event<IConnectionProfile> {
-		return this._onAddConnectionProfile.event;
-	}
-
-	public get onDeleteConnectionProfile(): Event<void> {
-		return this._onDeleteConnectionProfile.event;
-	}
-
-	public get onConnect(): Event<IConnectionParams> {
-		return this._onConnect.event;
-	}
-
-	public get onDisconnect(): Event<IConnectionParams> {
-		return this._onDisconnect.event;
-	}
-
-	public get onConnectionChanged(): Event<IConnectionParams> {
-		return this._onConnectionChanged.event;
-	}
-
-	public get onConnectionRequestSent(): Event<void> {
-		return this._onConnectRequestSent.event;
-	}
-
-	public get onLanguageFlavorChanged(): Event<azdata.DidChangeLanguageFlavorParams> {
-		return this._onLanguageFlavorChanged.event;
-	}
-
-	private _providerCount: number = 0;
 
 	// Connection Provider Registration
 	public registerProvider(providerId: string, provider: azdata.ConnectionProvider): void {
@@ -597,7 +587,6 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 
 		return this._providers.get(connection.providerName).onReady.then((provider) => {
 			provider.connect(uri, connectionInfo);
-			this._onConnectRequestSent.fire();
 
 			// TODO make this generic enough to handle non-SQL languages too
 			this.doChangeLanguageFlavor(uri, 'sql', connection.providerName);
@@ -1180,7 +1169,6 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 	 * @returns array of connections
 	 **/
 	public getConnections(activeConnectionsOnly?: boolean): ConnectionProfile[] {
-
 		// 1. Active Connections
 		const connections = this.getActiveConnections();
 
@@ -1209,6 +1197,20 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 			}
 		}
 		return connections;
+	}
+
+	public getConnection(uri: string): ConnectionProfile {
+		const connections = this.getActiveConnections();
+		if (connections) {
+			for (let connection of connections) {
+				let connectionUri = this.getConnectionUriFromId(connection.id);
+				if (connectionUri === uri) {
+					return connection;
+				}
+			}
+		}
+
+		return undefined;
 	}
 
 	private getConnectionsInGroup(group: ConnectionProfileGroup): ConnectionProfile[] {
