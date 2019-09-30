@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { localize } from 'vs/nls';
-import { IDisposable, dispose, Disposable } from 'vs/base/common/lifecycle';
+import { IDisposable, Disposable } from 'vs/base/common/lifecycle';
 import { Event, Emitter } from 'vs/base/common/event';
 import { URI } from 'vs/base/common/uri';
 import { UntitledEditorInput } from 'vs/workbench/common/editor/untitledEditorInput';
@@ -19,7 +19,8 @@ import { IQueryModelService } from 'sql/platform/query/common/queryModel';
 import { ISelectionData, ExecutionPlanOptions } from 'azdata';
 import { UntitledEditorModel } from 'vs/workbench/common/editor/untitledEditorModel';
 import { IResolvedTextEditorModel } from 'vs/editor/common/services/resolverService';
-import { FileEditorInput } from 'vs/workbench/contrib/files/common/editors/fileEditorInput';
+import { ISimpleConnectionService } from 'sql/platform/connection/common/simpleConnectionService';
+import { Connection, ConnectionShape } from 'sql/platform/connection/common/connection';
 
 const MAX_SIZE = 13;
 
@@ -124,13 +125,14 @@ export class QueryInput extends EditorInput implements IEncodingSupport, IConnec
 	public get state(): QueryEditorState { return this._state; }
 
 	private _updateSelection: Emitter<ISelectionData>;
+	private connection?: Connection;
 
 	constructor(
 		private _description: string,
 		private _sql: UntitledEditorInput,
 		private _results: QueryResultsInput,
 		private _connectionProviderName: string,
-		@IConnectionManagementService private _connectionManagementService: IConnectionManagementService,
+		@ISimpleConnectionService private readonly connectionService: ISimpleConnectionService,
 		@IQueryModelService private _queryModelService: IQueryModelService,
 		@IConfigurationService private _configurationService: IConfigurationService,
 		@IFileService private _fileService: IFileService
@@ -166,20 +168,20 @@ export class QueryInput extends EditorInput implements IEncodingSupport, IConnec
 			);
 		}
 
-		if (this._connectionManagementService) {
-			this._register(this._connectionManagementService.onDisconnect(result => {
-				if (result.connectionUri === this.uri) {
-					this.onDisconnect();
-				}
-			}));
-			if (this.uri) {
-				if (this._connectionProviderName) {
-					this._connectionManagementService.doChangeLanguageFlavor(this.uri, 'sql', this._connectionProviderName);
-				} else {
-					this._connectionManagementService.ensureDefaultLanguageFlavor(this.uri);
-				}
-			}
-		}
+		// if (this._connectionManagementService) {
+		// 	this._register(this._connectionManagementService.onDisconnect(result => {
+		// 		if (result.connectionUri === this.uri) {
+		// 			this.onDisconnect();
+		// 		}
+		// 	}));
+		// 	if (this.uri) {
+		// 		if (this._connectionProviderName) {
+		// 			this._connectionManagementService.doChangeLanguageFlavor(this.uri, 'sql', this._connectionProviderName);
+		// 		} else {
+		// 			this._connectionManagementService.ensureDefaultLanguageFlavor(this.uri);
+		// 		}
+		// 	}
+		// }
 
 		if (this._configurationService) {
 			this._register(this._configurationService.onDidChangeConfiguration(e => {
@@ -243,25 +245,25 @@ export class QueryInput extends EditorInput implements IEncodingSupport, IConnec
 	}
 
 	public getName(longForm?: boolean): string {
-		if (this._configurationService.getValue('sql.showConnectionInfoInTitle')) {
-			let profile = this._connectionManagementService.getConnectionProfile(this.uri);
-			let title = '';
-			if (this._description && this._description !== '') {
-				title = this._description + ' ';
-			}
-			if (profile) {
-				if (profile.userName) {
-					title += `${profile.serverName}.${profile.databaseName} (${profile.userName})`;
-				} else {
-					title += `${profile.serverName}.${profile.databaseName} (${profile.authenticationType})`;
-				}
-			} else {
-				title += localize('disconnected', "disconnected");
-			}
-			return this._sql.getName() + (longForm ? (' - ' + title) : ` - ${trimTitle(title)}`);
-		} else {
+		// if (this._configurationService.getValue('sql.showConnectionInfoInTitle')) {
+		// 	let profile = this._connectionManagementService.getConnectionProfile(this.uri);
+		// 	let title = '';
+		// 	if (this._description && this._description !== '') {
+		// 		title = this._description + ' ';
+		// 	}
+		// 	if (profile) {
+		// 		if (profile.userName) {
+		// 			title += `${profile.serverName}.${profile.databaseName} (${profile.userName})`;
+		// 		} else {
+		// 			title += `${profile.serverName}.${profile.databaseName} (${profile.authenticationType})`;
+		// 		}
+		// 	} else {
+		// 		title += localize('disconnected', "disconnected");
+		// 	}
+		// 	return this._sql.getName() + (longForm ? (' - ' + title) : ` - ${trimTitle(title)}`);
+		// } else {
 			return this._sql.getName();
-		}
+		// }
 	}
 
 	// Called to get the tooltip of the tab
@@ -346,18 +348,28 @@ export class QueryInput extends EditorInput implements IEncodingSupport, IConnec
 
 	public close(): void {
 		this._queryModelService.disposeQuery(this.uri);
-		this._connectionManagementService.disconnectEditor(this, true);
 
 		this._sql.close();
 		this._results.close();
 		super.close();
 	}
 
+	public async connect(shape: ConnectionShape): Promise<boolean> {
+		if (this.connection) {
+			throw new Error('Editor already connected');
+		}
+
+		this.connection = await this.connectionService.connect(shape);
+
+		return this.connection ? true : false;
+	}
+
 	/**
 	 * Get the color that should be displayed
 	 */
 	public get tabColor(): string {
-		return this._connectionManagementService.getTabColorForUri(this.uri);
+		// return this._connectionManagementService.getTabColorForUri(this.uri);
+		return '';
 	}
 
 	public get isSharedSession(): boolean {

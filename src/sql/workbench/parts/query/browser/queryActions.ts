@@ -34,7 +34,7 @@ import { IObjectExplorerService } from 'sql/workbench/services/objectExplorer/br
 import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
 import { IQueryEditorService } from 'sql/workbench/services/queryEditor/common/queryEditorService';
 import { IConnectionProfile } from 'sql/platform/connection/common/interfaces';
-import { getCurrentGlobalConnection } from 'sql/workbench/browser/taskUtilities';
+import { getCurrentGlobalConnection, invokableGlobalConnection } from 'sql/workbench/browser/taskUtilities';
 import { ServicesAccessor, IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 import { CommandsRegistry } from 'vs/platform/commands/common/commands';
 import { OEAction } from 'sql/workbench/parts/objectExplorer/browser/objectExplorerActions';
@@ -42,6 +42,9 @@ import { TreeViewItemHandleArg } from 'sql/workbench/common/views';
 import { ICapabilitiesService } from 'sql/platform/capabilities/common/capabilitiesService';
 import { ConnectionProfile } from 'sql/platform/connection/common/connectionProfile';
 import { IQueryManagementService } from 'sql/platform/query/common/queryManagement';
+import { QueryInput } from 'sql/workbench/parts/query/common/queryInput';
+import { profileToConnectionShape } from 'sql/platform/connection/common/connection';
+import { ISimpleConnectionService } from 'sql/platform/connection/common/simpleConnectionService';
 
 /**
  * Action class that query-based Actions will extend. This base class automatically handles activating and
@@ -399,36 +402,23 @@ export class DisconnectDatabaseAction extends QueryTaskbarAction {
 /**
  * Action class that launches a connection dialogue for the current query file
  */
-export class ConnectDatabaseAction extends QueryTaskbarAction {
+export class ConnectDatabaseAction extends Action {
 
 	public static EnabledDefaultClass = 'connect';
 	public static EnabledChangeClass = 'changeConnection';
 	public static ID = 'connectDatabaseAction';
 
 	constructor(
-		editor: QueryEditor,
-		isChangeConnectionAction: boolean,
-		@IConnectionManagementService connectionManagementService: IConnectionManagementService
+		@IEditorService private readonly editorService: IEditorService,
+		@IInstantiationService private readonly instantiationService: IInstantiationService
 	) {
-		let label: string;
-		let enabledClass: string;
-
-		if (isChangeConnectionAction) {
-			enabledClass = ConnectDatabaseAction.EnabledChangeClass;
-			label = nls.localize('changeConnectionDatabaseLabel', "Change Connection");
-		} else {
-			enabledClass = ConnectDatabaseAction.EnabledDefaultClass;
-			label = nls.localize('connectDatabaseLabel', "Connect");
-		}
-
-		super(connectionManagementService, editor, ConnectDatabaseAction.ID, enabledClass);
-
-		this.label = label;
+		super(ConnectDatabaseAction.ID, nls.localize('connectDatabaseLabel', "Connect"), ConnectDatabaseAction.EnabledDefaultClass);
 	}
 
-	public async run(): Promise<void> {
-		this.connectEditor(this.editor);
-		return;
+	public async run(): Promise<boolean> {
+		const editor = this.editorService.activeEditor as QueryInput;
+		const profile = this.instantiationService.invokeFunction(invokableGlobalConnection);
+		return editor.connect(profileToConnectionShape(profile));
 	}
 }
 
@@ -436,55 +426,25 @@ export class ConnectDatabaseAction extends QueryTaskbarAction {
  * Action class that either launches a connection dialogue for the current query file,
  * or disconnects the active connection
  */
-export class ToggleConnectDatabaseAction extends QueryTaskbarAction {
+export class ToggleConnectDatabaseAction extends Action {
 
-	public static ConnectClass = 'connect';
-	public static DisconnectClass = 'disconnect';
-	public static ID = 'toggleConnectDatabaseAction';
+	public static readonly ConnectClass = 'connect';
+	public static readonly DisconnectClass = 'disconnect';
+	public static readonly ID = 'toggleConnectDatabaseAction';
 
-	private _connectLabel = nls.localize('connectDatabaseLabel', "Connect");
-	private _disconnectLabel = nls.localize('disconnectDatabaseLabel', "Disconnect");
+	public static readonly connectLabel = nls.localize('connectDatabaseLabel', "Connect");
+	public static readonly disconnectLabel = nls.localize('disconnectDatabaseLabel', "Disconnect");
 	constructor(
-		editor: QueryEditor,
-		private _connected: boolean,
-		@IConnectionManagementService connectionManagementService: IConnectionManagementService
+		@IEditorService private readonly editorService: IEditorService,
+		@IInstantiationService private readonly instantiationService: IInstantiationService
 	) {
-		super(connectionManagementService, editor, ToggleConnectDatabaseAction.ID, undefined);
+		super(ToggleConnectDatabaseAction.ID, ToggleConnectDatabaseAction.connectLabel, ToggleConnectDatabaseAction.ConnectClass);
 	}
 
-	public get connected(): boolean {
-		return this._connected;
-	}
-
-	public set connected(value: boolean) {
-		// intentionally always updating, since parent class handles skipping if values
-		this._connected = value;
-		this.updateLabelAndIcon();
-	}
-
-	private updateLabelAndIcon(): void {
-		if (this._connected) {
-			// We are connected, so show option to disconnect
-			this.label = this._disconnectLabel;
-			this.updateCssClass(ToggleConnectDatabaseAction.DisconnectClass);
-		} else {
-			this.label = this._connectLabel;
-			this.updateCssClass(ToggleConnectDatabaseAction.ConnectClass);
-		}
-	}
-
-
-	public async run(): Promise<void> {
-		if (!this.editor.input.isSharedSession) {
-			if (this.connected) {
-				// Call disconnectEditor regardless of the connection state and let the ConnectionManagementService
-				// determine if we need to disconnect, cancel an in-progress connection, or do nothing
-				this.connectionManagementService.disconnectEditor(this.editor.input);
-			} else {
-				this.connectEditor(this.editor);
-			}
-		}
-		return;
+	public async run(): Promise<boolean> {
+		const editor = this.editorService.activeEditor as QueryInput;
+		const profile = this.instantiationService.invokeFunction(invokableGlobalConnection);
+		return editor.connect(profileToConnectionShape(profile));
 	}
 }
 

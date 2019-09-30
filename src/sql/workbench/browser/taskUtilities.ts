@@ -18,6 +18,7 @@ import { ProfilerInput } from 'sql/workbench/parts/profiler/browser/profilerInpu
 
 import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
 import { IInsightsConfig } from 'sql/platform/dashboard/browser/insightRegistry';
+import { ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
 
 export function replaceConnection(oldUri: string, newUri: string, connectionService: IConnectionManagementService): Promise<IConnectionResult> {
 	return new Promise<IConnectionResult>((resolve, reject) => {
@@ -96,4 +97,11 @@ export function getCurrentGlobalConnection(objectExplorerService: IObjectExplore
 	}
 
 	return connection;
+}
+
+export function invokableGlobalConnection(accessor: ServicesAccessor): IConnectionProfile {
+	const oeService = accessor.get(IObjectExplorerService);
+	const cmService = accessor.get(IConnectionManagementService);
+	const editorService = accessor.get(IEditorService);
+	return getCurrentGlobalConnection(oeService, cmService, editorService);
 }

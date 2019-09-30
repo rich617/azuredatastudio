@@ -50,6 +50,7 @@ import { IStorageService, StorageScope } from 'vs/platform/storage/common/storag
 import { Memento } from 'vs/workbench/common/memento';
 import { IEnvironmentService } from 'vs/platform/environment/common/environment';
 import { INotificationService } from 'vs/platform/notification/common/notification';
+import { ISimpleConnectionService } from 'sql/platform/connection/common/simpleConnectionService';
 
 export class ConnectionManagementService extends Disposable implements IConnectionManagementService {
 
@@ -87,7 +88,8 @@ export class ConnectionManagementService extends Disposable implements IConnecti
 		@IAccountManagementService private _accountManagementService: IAccountManagementService,
 		@ILogService private _logService: ILogService,
 		@IStorageService private _storageService: IStorageService,
-		@IEnvironmentService private _environmentService: IEnvironmentService
+		@IEnvironmentService private _environmentService: IEnvironmentService,
+		@ISimpleConnectionService private readonly simpleConnectionService: ISimpleConnectionService
 	) {
 		super();
 

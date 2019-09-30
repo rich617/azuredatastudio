@@ -25,6 +25,8 @@ import { ISerializationService } from 'sql/platform/serialization/common/seriali
 import { IFileBrowserService } from 'sql/platform/fileBrowser/common/interfaces';
 import { IExtHostContext } from 'vs/workbench/api/common/extHost.protocol';
 import { extHostNamedCustomer } from 'vs/workbench/api/common/extHostCustomers';
+import { ISimpleConnectionService, ConnectionInfo, IConnectionProvider } from 'sql/platform/connection/common/simpleConnectionService';
+import { Emitter } from 'vs/base/common/event';
 
 /**
  * Main thread class for handling data protocol management registration.
@@ -35,6 +37,8 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 	private _proxy: ExtHostDataProtocolShape;
 
 	private _capabilitiesRegistrations: { [handle: number]: IDisposable; } = Object.create(null); // should we be registering these?
+
+	private connectionProviders = new Map<string, ConnectionProvider>();
 
 	constructor(
 		extHostContext: IExtHostContext,
@@ -51,7 +55,8 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 		@ITaskService private _taskService: ITaskService,
 		@IProfilerService private _profilerService: IProfilerService,
 		@ISerializationService private _serializationService: ISerializationService,
-		@IFileBrowserService private _fileBrowserService: IFileBrowserService
+		@IFileBrowserService private _fileBrowserService: IFileBrowserService,
+		@ISimpleConnectionService private readonly connectionService: ISimpleConnectionService
 	) {
 		super();
 		if (extHostContext) {
@@ -90,6 +95,12 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 				return self._proxy.$rebuildIntelliSenseCache(handle, connectionUri);
 			}
 		});
+
+		const provider = new ConnectionProvider(this._proxy, handle);
+
+		this.connectionService.registerProvider(providerId, provider);
+
+		this.connectionProviders.set(providerId, provider);
 
 		return undefined;
 	}
@@ -472,6 +483,7 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 
 	// Connection Management handlers
 	public $onConnectionComplete(handle: number, connectionInfoSummary: azdata.ConnectionInfoSummary): void {
+		this.connectionService.onConnectionComplete(connectionInfoSummary);
 		this._connectionManagementService.onConnectionComplete(handle, connectionInfoSummary);
 	}
 
@@ -573,5 +585,28 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 		}
 
 		return undefined;
+	}
+}
+
+class ConnectionProvider implements IConnectionProvider {
+	private _onConnectionComplete = new Emitter<string>();
+	public onConnectionComplete = this._onConnectionComplete.event;
+
+	constructor(private proxy: ExtHostDataProtocolShape, private handle: number) { }
+
+	connect(id: string, info: ConnectionInfo): Promise<boolean> {
+		return Promise.resolve(this.proxy.$connect(this.handle, id, info));
+	}
+
+	disconnect(id: string): Promise<boolean> {
+		return Promise.resolve(this.proxy.$disconnect(this.handle, id));
+	}
+
+	cancelConnect(id: string): Promise<boolean> {
+		return Promise.resolve(this.proxy.$cancelConnect(this.handle, id));
+	}
+
+	connectionComplate(id: string): void {
+		this._onConnectionComplete.fire(id);
 	}
 }

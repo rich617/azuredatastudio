@@ -177,8 +177,8 @@ export class QueryEditor extends BaseEditor {
 		// Create Actions for the toolbar
 		this._runQueryAction = this.instantiationService.createInstance(actions.RunQueryAction, this);
 		this._cancelQueryAction = this.instantiationService.createInstance(actions.CancelQueryAction, this);
-		this._toggleConnectDatabaseAction = this.instantiationService.createInstance(actions.ToggleConnectDatabaseAction, this, false);
-		this._changeConnectionAction = this.instantiationService.createInstance(actions.ConnectDatabaseAction, this, true);
+		this._toggleConnectDatabaseAction = this.instantiationService.createInstance(actions.ToggleConnectDatabaseAction);
+		this._changeConnectionAction = this.instantiationService.createInstance(actions.ConnectDatabaseAction);
 		this._listDatabasesAction = this.instantiationService.createInstance(actions.ListDatabasesAction, this);
 		this._estimatedQueryPlanAction = this.instantiationService.createInstance(actions.EstimatedQueryPlanAction, this);
 		this._actualQueryPlanAction = this.instantiationService.createInstance(actions.ActualQueryPlanAction, this);
@@ -198,7 +198,7 @@ export class QueryEditor extends BaseEditor {
 	 */
 	private updateState(stateChangeEvent: IQueryEditorStateChange): void {
 		if (stateChangeEvent.connectedChange) {
-			this._toggleConnectDatabaseAction.connected = this.input.state.connected;
+			// this._toggleConnectDatabaseAction.connected = this.input.state.connected;
 			this._changeConnectionAction.enabled = this.input.state.connected;
 			if (this.input.state.connected) {
 				this.listDatabasesActionItem.onConnected();

@@ -292,7 +292,7 @@ suite('SQL QueryEditor Tests', () => {
 				fileInput,
 				undefined,
 				undefined,
-				connectionManagementService.object,
+				undefined,
 				queryModelService.object,
 				undefined,
 				undefined
