@@ -120,7 +120,8 @@ export class SimpleConnectionService implements ISimpleConnectionService {
 		const promise = new Deferred<Connection | undefined>();
 		this.connecting.set(id, promise);
 		if (!shape.password) {
-			this.credentials.readCredential(shape.provider);
+			const cred = await this.credentials.readCredential(shape.provider);
+			shape.password = cred.password;
 		}
 		const info = this.instantiation.invokeFunction(shapeToInfo, shape);
 		if (!info) {
@@ -151,13 +152,13 @@ export class SimpleConnectionService implements ISimpleConnectionService {
 		if (info.errorMessage) {
 			console.log('Connection error', info.errorMessage);
 		}
-		this.handleConnectionComplete(info.connectionId);
+		this.handleConnectionComplete(info.ownerUri);
 	}
 }
 
 registerSingleton(ISimpleConnectionService, SimpleConnectionService);
 
-function shapeToInfo(accessor: ServicesAccessor, shape: ConnectionShape): ConnectionInfo | undefined{
+function shapeToInfo(accessor: ServicesAccessor, shape: ConnectionShape): ConnectionInfo | undefined {
 	const capService = accessor.get(ICapabilitiesService);
 	const features = capService.getCapabilities(shape.provider);
 	if (features) {
