@@ -39,10 +39,9 @@ export class OEShimService extends Disposable implements IOEShimService {
 	private nodeInfoMap = new Map<ITreeItem, azdata.NodeInfo>();
 
 	constructor(
-		@IObjectExplorerService private oe: IObjectExplorerService,
-		@IConnectionManagementService private cm: IConnectionManagementService,
-		@IConnectionDialogService private cd: IConnectionDialogService,
-		@ICapabilitiesService private capabilities: ICapabilitiesService
+		@IObjectExplorerService private readonly oe: IObjectExplorerService,
+		@IConnectionManagementService private readonly cm: IConnectionManagementService,
+		@ICapabilitiesService private readonly capabilities: ICapabilitiesService
 	) {
 		super();
 	}
@@ -50,13 +49,7 @@ export class OEShimService extends Disposable implements IOEShimService {
 	private async createSession(viewId: string, providerId: string, node: ITreeItem): Promise<string> {
 		let connProfile = new ConnectionProfile(this.capabilities, node.payload);
 		connProfile.saveProfile = false;
-		if (this.cm.providerRegistered(providerId)) {
-			connProfile = await this.connectOrPrompt(connProfile);
-		} else {
-			// Throw and expect upstream handler to notify about the error
-			// TODO: In the future should use extension recommendations to prompt for correct extension
-			throw new Error(localize('noProviderFound', "Cannot expand as the required connection provider '{0}' was not found", providerId));
-		}
+		connProfile = await this.connectOrPrompt(connProfile);
 		let sessionResp = await this.oe.createNewSession(providerId, connProfile);
 		let sessionId = sessionResp.sessionId;
 		await new Promise((resolve, reject) => {

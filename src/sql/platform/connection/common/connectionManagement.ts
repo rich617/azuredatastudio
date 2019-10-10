@@ -10,8 +10,6 @@ import { IConnectionProfileGroup, ConnectionProfileGroup } from 'sql/platform/co
 import { ConnectionProfile } from 'sql/platform/connection/common/connectionProfile';
 import { IConnectionProfile } from 'sql/platform/connection/common/interfaces';
 import { ConnectionManagementInfo } from 'sql/platform/connection/common/connectionManagementInfo';
-import { IServerGroupDialogCallbacks } from 'sql/platform/serverGroup/common/serverGroupController';
-import { ConnectionProviderProperties } from 'sql/workbench/parts/connection/common/connectionProviderExtension';
 
 /**
  * Options for the actions that could happen after connecting is complete
@@ -70,9 +68,6 @@ export interface IConnectionManagementService {
 	// Event Emitters
 	onAddConnectionProfile: Event<IConnectionProfile>;
 	onDeleteConnectionProfile: Event<void>;
-	onConnect: Event<IConnectionParams>;
-	onDisconnect: Event<IConnectionParams>;
-	onConnectionChanged: Event<IConnectionParams>;
 	onLanguageFlavorChanged: Event<azdata.DidChangeLanguageFlavorParams>;
 
 	/**
@@ -102,15 +97,6 @@ export interface IConnectionManagementService {
 	 * The purpose is connection by default
 	 */
 	connectIfNotConnected(connection: IConnectionProfile, purpose?: 'dashboard' | 'insights' | 'connection', saveConnection?: boolean): Promise<string>;
-
-	/**
-	 * Adds the successful connection to MRU and send the connection error back to the connection handler for failed connections
-	 */
-	onConnectionComplete(handle: number, connectionInfoSummary: azdata.ConnectionInfoSummary): void;
-
-	onIntelliSenseCacheComplete(handle: number, connectionUri: string): void;
-
-	onConnectionChangedNotification(handle: number, changedConnInfo: azdata.ChangedConnectionInfo): void;
 
 	getConnectionGroups(providers?: string[]): ConnectionProfileGroup[];
 
@@ -156,20 +142,9 @@ export interface IConnectionManagementService {
 
 	isConnected(fileUri: string, connectionProfile?: ConnectionProfile): boolean;
 
-	disconnectEditor(owner: IConnectableInput, force?: boolean): Promise<boolean>;
-
-	disconnect(connection: IConnectionProfile): Promise<void>;
-
-	disconnect(ownerUri: string): Promise<void>;
-
 	addSavedPassword(connectionProfile: IConnectionProfile): Promise<IConnectionProfile>;
 
 	listDatabases(connectionUri: string): Thenable<azdata.ListDatabasesResult>;
-
-	/**
-	 * Register a connection provider
-	 */
-	registerProvider(providerId: string, provider: azdata.ConnectionProvider): void;
 
 	registerIconProvider(providerId: string, provider: azdata.IconProvider): void;
 
@@ -182,19 +157,9 @@ export interface IConnectionManagementService {
 	getDefaultProviderId(): string;
 
 	/**
-	 * Cancels the connection
-	 */
-	cancelConnection(connection: IConnectionProfile): Thenable<boolean>;
-
-	/**
 	 * Changes the database for an active connection
 	 */
 	changeDatabase(connectionUri: string, databaseName: string): Thenable<boolean>;
-
-	/**
-	 * Cancels the connection for the editor
-	 */
-	cancelEditorConnection(owner: IConnectableInput): Thenable<boolean>;
 
 	showDashboard(connection: IConnectionProfile): Thenable<boolean>;
 
@@ -261,13 +226,10 @@ export interface IConnectionManagementService {
 	 */
 	buildConnectionInfo(connectionString: string, provider?: string): Thenable<azdata.ConnectionInfo>;
 
-	providerRegistered(providerId: string): boolean;
 	/**
 	 * Get connection profile by id
 	 */
 	getConnectionProfileById(profileId: string): IConnectionProfile;
-
-	getProviderProperties(providerName: string): ConnectionProviderProperties;
 
 	getConnectionIconId(connectionId: string): string;
 

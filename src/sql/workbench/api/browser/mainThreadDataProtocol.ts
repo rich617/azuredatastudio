@@ -68,38 +68,8 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 	}
 
 	public $registerConnectionProvider(providerId: string, handle: number): Promise<any> {
-		const self = this;
-		this._connectionManagementService.registerProvider(providerId, <azdata.ConnectionProvider>{
-			connect(connectionUri: string, connectionInfo: azdata.ConnectionInfo): Thenable<boolean> {
-				return self._proxy.$connect(handle, connectionUri, connectionInfo);
-			},
-			disconnect(connectionUri: string): Thenable<boolean> {
-				return self._proxy.$disconnect(handle, connectionUri);
-			},
-			changeDatabase(connectionUri: string, newDatabase: string): Thenable<boolean> {
-				return self._proxy.$changeDatabase(handle, connectionUri, newDatabase);
-			},
-			cancelConnect(connectionUri: string): Thenable<boolean> {
-				return self._proxy.$cancelConnect(handle, connectionUri);
-			},
-			listDatabases(connectionUri: string): Thenable<azdata.ListDatabasesResult> {
-				return self._proxy.$listDatabases(handle, connectionUri);
-			},
-			getConnectionString(connectionUri: string, includePassword: boolean): Thenable<string> {
-				return self._proxy.$getConnectionString(handle, connectionUri, includePassword);
-			},
-			buildConnectionInfo(connectionString: string): Thenable<azdata.ConnectionInfo> {
-				return self._proxy.$buildConnectionInfo(handle, connectionString);
-			},
-			rebuildIntelliSenseCache(connectionUri: string): Thenable<void> {
-				return self._proxy.$rebuildIntelliSenseCache(handle, connectionUri);
-			}
-		});
-
 		const provider = new ConnectionProvider(this._proxy, handle);
-
 		this.connectionService.registerProvider(providerId, provider);
-
 		this.connectionProviders.set(providerId, provider);
 
 		return undefined;
@@ -484,7 +454,6 @@ export class MainThreadDataProtocol extends Disposable implements MainThreadData
 	// Connection Management handlers
 	public $onConnectionComplete(handle: number, connectionInfoSummary: azdata.ConnectionInfoSummary): void {
 		this.connectionService.onConnectionComplete(connectionInfoSummary);
-		this._connectionManagementService.onConnectionComplete(handle, connectionInfoSummary);
 	}
 
 	public $onIntelliSenseCacheComplete(handle: number, connectionUri: string): void {

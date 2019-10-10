@@ -13,6 +13,9 @@ import { Deferred } from 'sql/base/common/promise';
 import { generateUuid } from 'vs/base/common/uuid';
 import { ICapabilitiesService } from 'sql/platform/capabilities/common/capabilitiesService';
 import { ICredentialsService } from 'sql/platform/credentials/common/credentialsService';
+import { Registry } from 'vs/platform/registry/common/platform';
+import { IConnectionProviderRegistry, Extensions as ConnectionProviderExtensions, ConnectionProviderProperties } from 'sql/workbench/parts/connection/common/connectionProviderExtension';
+import { entries } from 'sql/base/common/objects';
 
 export interface ConnectOptions {
 	/**
@@ -88,10 +91,12 @@ export interface ISimpleConnectionService {
 
 export const ISimpleConnectionService = createDecorator<ISimpleConnectionService>('simpleConnectionService');
 
+const conRegistry = Registry.as<IConnectionProviderRegistry>(ConnectionProviderExtensions.ConnectionProviderContributions);
+
 export class SimpleConnectionService implements ISimpleConnectionService {
 	_serviceBrand: undefined;
 
-	private providers = new Map<string, IConnectionProvider>();
+	private providers = new Map<string, Promise<IConnectionProvider>>();
 	private store = new ConnectionStore();
 
 	// not ideal
@@ -99,7 +104,15 @@ export class SimpleConnectionService implements ISimpleConnectionService {
 
 	constructor(
 		@IInstantiationService private readonly instantiation: IInstantiationService,
-		@ICredentialsService private readonly credentials: ICredentialsService) { }
+		@ICredentialsService private readonly credentials: ICredentialsService) {
+
+		const providerRegistration = (p: { id: string, properties: ConnectionProviderProperties }) => {
+			this.providers.set(p.id, new Deferred<IConnectionProvider>());
+		};
+
+		conRegistry.onNewProvider(providerRegistration, this);
+		entries(conRegistry.providers).map(v => providerRegistration({ id: v[0], properties: v[1] }));
+	}
 
 	async connect(shape: ConnectionShape, options: ConnectOptions = defaultConnectOptions): Promise<Connection | undefined> {
 		options = assign(options, defaultConnectOptions);
@@ -127,7 +140,7 @@ export class SimpleConnectionService implements ISimpleConnectionService {
 		if (!info) {
 			throw new Error('Failure to contact provider');
 		}
-		const res = await this.providers.get(shape.provider)!.connect(id, info);
+		const res = await (await this.providers.get(shape.provider)!).connect(id, info);
 		if (!res) {
 			promise.resolve();
 		}
@@ -135,10 +148,10 @@ export class SimpleConnectionService implements ISimpleConnectionService {
 	}
 
 	registerProvider(id: string, provider: IConnectionProvider): void {
-		if (this.providers.has(id)) {
-			throw new Error(`Provider ${id} already exists`); // TODO probably localize
+		if (!this.providers.has(id)) {
+			throw new Error('Provider not contributed yet');
 		}
-		this.providers.set(id, provider);
+		(this.providers.get(id)! as Deferred<IConnectionProvider>).resolve(provider);
 		provider.onConnectionComplete(this.handleConnectionComplete, this);
 	}
 
