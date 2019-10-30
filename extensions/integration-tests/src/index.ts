@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as testRunner from 'vscode/lib/testrunner';
+import * as testRunner from 'vscode-test';
 import * as vscode from 'vscode';
 
 import { SuiteType, getSuiteType } from 'adstest';
