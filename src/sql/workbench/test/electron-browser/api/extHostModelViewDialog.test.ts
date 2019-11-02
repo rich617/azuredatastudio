@@ -5,7 +5,7 @@
 
 import * as azdata from 'azdata';
 import * as assert from 'assert';
-import { Mock, It, Times } from 'typemoq';
+import { IMock, Mock, It, Times } from 'typemoq';
 import { ExtHostModelViewDialog } from 'sql/workbench/api/common/extHostModelViewDialog';
 import { MainThreadModelViewDialogShape, ExtHostModelViewShape } from 'sql/workbench/api/common/sqlExtHost.protocol';
 import { IMainContext } from 'vs/workbench/api/common/extHost.protocol';
@@ -14,8 +14,8 @@ import { MessageLevel } from 'sql/workbench/api/common/sqlExtHostTypes';
 
 suite('ExtHostModelViewDialog Tests', () => {
 	let extHostModelViewDialog: ExtHostModelViewDialog;
-	let mockProxy: Mock<MainThreadModelViewDialogShape>;
-	let extHostModelView: Mock<ExtHostModelViewShape>;
+	let mockProxy: IMock<MainThreadModelViewDialogShape>;
+	let extHostModelView: IMock<ExtHostModelViewShape>;
 
 	setup(() => {
 		mockProxy = Mock.ofInstance(<MainThreadModelViewDialogShape>{

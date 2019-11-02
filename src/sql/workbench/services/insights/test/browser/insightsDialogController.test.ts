@@ -39,7 +39,7 @@ suite('Insights Dialog Controller Tests', () => {
 		instMoq.setup(x => x.createInstance(It.isValue(QueryRunner), It.isAny()))
 			.returns(() => runner);
 
-		let connMoq = Mock.ofType(ConnectionManagementService, MockBehavior.Strict, {}, {}, new TestStorageService());
+		let connMoq = Mock.ofType(ConnectionManagementService, MockBehavior.Strict, true, {}, {}, new TestStorageService());
 		connMoq.setup(x => x.connect(It.isAny(), It.isAny()))
 			.returns(() => Promise.resolve(undefined));
 

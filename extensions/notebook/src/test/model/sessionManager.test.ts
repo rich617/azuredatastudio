@@ -3,9 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import { nb } from 'azdata';
 import { SessionManager, Session, Kernel } from '@jupyterlab/services';
@@ -13,7 +11,7 @@ import 'mocha';
 
 import { JupyterSessionManager, JupyterSession } from '../../jupyter/jupyterSessionManager';
 import { Deferred } from '../../common/promise';
-import { SessionStub, KernelStub } from '../common';
+import { SessionStub, KernelStub, isUndefinedOrNull } from '../common';
 
 describe('Jupyter Session Manager', function (): void {
 	let mockJupyterManager = TypeMoq.Mock.ofType<SessionManager>();
@@ -26,12 +24,12 @@ describe('Jupyter Session Manager', function (): void {
 
 		// When I call before resolve I expect it'll be false
 		sessionManager.setJupyterSessionManager(mockJupyterManager.object);
-		should(sessionManager.isReady).be.false();
+		assert(!sessionManager.isReady);
 
 		// When I call a after resolve, it'll be true
 		deferred.resolve();
 		sessionManager.ready.then(() => {
-			should(sessionManager.isReady).be.true();
+			assert(sessionManager.isReady);
 			done();
 		});
 	});
@@ -52,7 +50,7 @@ describe('Jupyter Session Manager', function (): void {
 	it('should handle null specs', function (): void {
 		mockJupyterManager.setup(m => m.specs).returns(() => undefined);
 		let specs = sessionManager.specs;
-		should(specs).be.undefined();
+		assert(isUndefinedOrNull(specs));
 	});
 
 	it('should map specs to named kernels', function (): void {
@@ -65,8 +63,8 @@ describe('Jupyter Session Manager', function (): void {
 		};
 		mockJupyterManager.setup(m => m.specs).returns(() => internalSpecs);
 		let specs = sessionManager.specs;
-		should(specs.defaultKernel).equal('mssql');
-		should(specs.kernels).have.length(2);
+		assert.equal(specs.defaultKernel, 'mssql');
+		assert.equal(specs.kernels.length, 2);
 	});
 
 
@@ -87,12 +85,12 @@ describe('Jupyter Session Manager', function (): void {
 		// When I call startSession
 		let session = await sessionManager.startNew(sessionOptions, true);
 		// Then I expect the parameters passed to be correct
-		should(session.path).equal(sessionOptions.path);
-		should(session.canChangeKernels).be.true();
-		should(session.id).equal(expectedSessionInfo.id);
-		should(session.name).equal(expectedSessionInfo.name);
-		should(session.type).equal(expectedSessionInfo.type);
-		should(session.kernel.name).equal(expectedSessionInfo.kernel.name);
+		assert.equal(session.path, sessionOptions.path);
+		assert(session.canChangeKernels);
+		assert.equal(session.id, expectedSessionInfo.id);
+		assert.equal(session.name, expectedSessionInfo.name);
+		assert.equal(session.type, expectedSessionInfo.type);
+		assert.equal(session.kernel.name, expectedSessionInfo.kernel.name);
 	});
 
 	it('Should call to shutdown with correct id', async function (): Promise<void> {
@@ -114,7 +112,7 @@ describe('Jupyter Session', function (): void {
 	});
 
 	it('should always be able to change kernels', function (): void {
-		should(session.canChangeKernels).be.true();
+		assert(session.canChangeKernels);
 	});
 	it('should pass through most properties', function (): void {
 		// Given values for the passthrough properties
@@ -124,16 +122,16 @@ describe('Jupyter Session', function (): void {
 		mockJupyterSession.setup(s => s.type).returns(() => 'type');
 		mockJupyterSession.setup(s => s.status).returns(() => 'starting');
 		// Should return those values when called
-		should(session.id).equal('id');
-		should(session.name).equal('name');
-		should(session.path).equal('path');
-		should(session.type).equal('type');
-		should(session.status).equal('starting');
+		assert.equal(session.id, 'id');
+		assert.equal(session.name, 'name');
+		assert.equal(session.path, 'path');
+		assert.equal(session.type, 'type');
+		assert.equal(session.status, 'starting');
 	});
 
 	it('should handle null kernel', function (): void {
 		mockJupyterSession.setup(s => s.kernel).returns(() => undefined);
-		should(session.kernel).be.undefined();
+		assert(isUndefinedOrNull(session.kernel));
 	});
 
 	it('should passthrough kernel', function (): void {
@@ -146,7 +144,7 @@ describe('Jupyter Session', function (): void {
 		let kernel = session.kernel;
 		kernel = session.kernel;
 		// Then I expect it to have the ID, and only be called once
-		should(kernel.id).equal('id');
+		assert.equal(kernel.id, 'id');
 		mockJupyterSession.verify(s => s.kernel, TypeMoq.Times.exactly(2));
 	});
 
@@ -165,7 +163,7 @@ describe('Jupyter Session', function (): void {
 			name: 'python'
 		});
 		// Then I expect it to have the ID, and only be called once
-		should(kernel.id).equal('id');
-		should(options.name).equal('python');
+		assert.equal(kernel.id, 'id');
+		assert.equal(options.name, 'python');
 	});
 });

@@ -3,8 +3,6 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
 
 import { IServerInstance } from '../jupyter/common';
@@ -257,3 +255,7 @@ export class FutureStub implements Kernel.IFuture {
 	}
 }
 //#endregion
+
+export function isUndefinedOrNull(t: any): t is undefined | null {
+	return t === undefined || t === null;
+}

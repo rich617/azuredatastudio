@@ -4,11 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 'use strict';
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import 'mocha';
 import * as azdata from 'azdata';
 import { JobData } from '../../data/jobData';
+import { isUndefinedOrNull } from '../types';
 
 const testOwnerUri = 'agent://testuri';
 let mockJobData: TypeMoq.IMock<JobData>;
@@ -34,49 +35,49 @@ describe('Agent extension create job objects', function (): void {
 	it('Create Job Data', async () => {
 		// should fail when ownerUri is null
 		let createJobResult = mockAgentService.object.createJob(null, TypeMoq.It.isAny());
-		should.strictEqual(createJobResult, undefined);
+		assert(isUndefinedOrNull(createJobResult));
 		createJobResult = mockAgentService.object.createJob(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createJobResult, undefined);
+		assert(!isUndefinedOrNull(createJobResult));
 		mockJobData = TypeMoq.Mock.ofType<JobData>(JobData, TypeMoq.MockBehavior.Loose, false, [TypeMoq.It.isAnyString(), undefined, mockAgentService]);
 	});
 
 	it('Create Alert Data', async () => {
 		// should fail when ownerUri is null
 		let createAlertResult = mockAgentService.object.createAlert(null, TypeMoq.It.isAny());
-		should.strictEqual(createAlertResult, undefined);
+		assert(isUndefinedOrNull(createAlertResult));
 		createAlertResult = mockAgentService.object.createAlert(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createAlertResult, undefined);
+		assert(!isUndefinedOrNull(createAlertResult));
 	});
 
 	it('Create Job Schedule Data', async () => {
 		// should fail when ownerUri is null
 		let createJobScheduleResult = mockAgentService.object.createJobSchedule(null, TypeMoq.It.isAny());
-		should.strictEqual(createJobScheduleResult, undefined);
+		assert(isUndefinedOrNull(createJobScheduleResult));
 		createJobScheduleResult = mockAgentService.object.createJobSchedule(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createJobScheduleResult, undefined);
+		assert(!isUndefinedOrNull(createJobScheduleResult));
 	});
 
 	it('Create Job Step Data', async () => {
 		// should fail when ownerUri is null
 		let createJobStepResult = mockAgentService.object.createJobStep(null, TypeMoq.It.isAny());
-		should.strictEqual(createJobStepResult, undefined);
+		assert(isUndefinedOrNull(createJobStepResult));
 		createJobStepResult = mockAgentService.object.createJobStep(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createJobStepResult, undefined);
+		assert(!isUndefinedOrNull(createJobStepResult));
 	});
 
 	it('Create Operator Data', async () => {
 		// should fail when ownerUri is null
 		let createOperatorResult = mockAgentService.object.createOperator(null, TypeMoq.It.isAny());
-		should.strictEqual(createOperatorResult, undefined);
+		assert(isUndefinedOrNull(createOperatorResult));
 		createOperatorResult = mockAgentService.object.createOperator(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createOperatorResult, undefined);
+		assert(!isUndefinedOrNull(createOperatorResult));
 	});
 
 	it('Create Proxy Data', async () => {
 		// should fail when ownerUri is null
 		let createProxyResult = mockAgentService.object.createProxy(null, TypeMoq.It.isAny());
-		should.strictEqual(createProxyResult, undefined);
+		assert(isUndefinedOrNull(createProxyResult));
 		createProxyResult = mockAgentService.object.createProxy(testOwnerUri, TypeMoq.It.isAny());
-		should.notEqual(createProxyResult, undefined);
+		assert(!isUndefinedOrNull(createProxyResult));
 	});
 });

@@ -72,26 +72,26 @@ let expectedNotebookContentOneCell: nb.INotebookContents = {
 
 let defaultUri = URI.file('/some/path.ipynb');
 
-let mockClientSession: TypeMoq.Mock<IClientSession>;
+let mockClientSession: TypeMoq.IMock<IClientSession>;
 let sessionReady: Deferred<void>;
-let mockModelFactory: TypeMoq.Mock<ModelFactory>;
-let notificationService: TypeMoq.Mock<INotificationService>;
-let capabilitiesService: TypeMoq.Mock<ICapabilitiesService>;
+let mockModelFactory: TypeMoq.IMock<ModelFactory>;
+let notificationService: TypeMoq.IMock<INotificationService>;
+let capabilitiesService: TypeMoq.IMock<ICapabilitiesService>;
 let instantiationService: IInstantiationService;
 
 suite('notebook model', function (): void {
 	let notebookManagers = [new NotebookManagerStub()];
-	let memento: TypeMoq.Mock<Memento>;
-	let queryConnectionService: TypeMoq.Mock<TestConnectionManagementService>;
+	let memento: TypeMoq.IMock<Memento>;
+	let queryConnectionService: TypeMoq.IMock<TestConnectionManagementService>;
 	let defaultModelOptions: INotebookModelOptions;
 	const logService = new NullLogService();
 	setup(() => {
 		sessionReady = new Deferred<void>();
 		notificationService = TypeMoq.Mock.ofType(TestNotificationService, TypeMoq.MockBehavior.Loose);
 		capabilitiesService = TypeMoq.Mock.ofType(TestCapabilitiesService);
-		memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, '');
+		memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, true, '');
 		memento.setup(x => x.getMemento(TypeMoq.It.isAny())).returns(() => void 0);
-		queryConnectionService = TypeMoq.Mock.ofType(TestConnectionManagementService, TypeMoq.MockBehavior.Loose, memento.object, undefined, new TestStorageService());
+		queryConnectionService = TypeMoq.Mock.ofType(TestConnectionManagementService, TypeMoq.MockBehavior.Loose, true, memento.object, undefined, new TestStorageService());
 		queryConnectionService.callBase = true;
 		let serviceCollection = new ServiceCollection();
 		instantiationService = new InstantiationService(serviceCollection, true);
@@ -108,7 +108,7 @@ suite('notebook model', function (): void {
 			layoutChanged: undefined,
 			capabilitiesService: capabilitiesService.object
 		};
-		mockClientSession = TypeMoq.Mock.ofType(ClientSession, undefined, defaultModelOptions);
+		mockClientSession = TypeMoq.Mock.ofType(ClientSession, TypeMoq.MockBehavior.Loose, true, defaultModelOptions);
 		mockClientSession.setup(c => c.initialize()).returns(() => {
 			return Promise.resolve();
 		});

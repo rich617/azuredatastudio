@@ -26,9 +26,9 @@ suite('Firewall rule dialog controller tests', () => {
 	let mockOnAddAccountErrorEvent: Emitter<string>;
 	let mockOnCreateFirewallRule: Emitter<void>;
 
-	let instantiationService: TypeMoq.Mock<InstantiationService>;
-	let mockFirewallRuleViewModel: TypeMoq.Mock<FirewallRuleViewModel>;
-	let mockFirewallRuleDialog: TypeMoq.Mock<FirewallRuleDialog>;
+	let instantiationService: TypeMoq.IMock<InstantiationService>;
+	let mockFirewallRuleViewModel: TypeMoq.IMock<FirewallRuleViewModel>;
+	let mockFirewallRuleDialog: TypeMoq.IMock<FirewallRuleDialog>;
 
 	setup(() => {
 		account = {
@@ -223,7 +223,7 @@ suite('Firewall rule dialog controller tests', () => {
 	});
 });
 
-function getMockAccountManagementService(resolveSecurityToken: boolean): TypeMoq.Mock<TestAccountManagementService> {
+function getMockAccountManagementService(resolveSecurityToken: boolean): TypeMoq.IMock<TestAccountManagementService> {
 	let accountManagementTestService = new TestAccountManagementService();
 	let mockAccountManagementService = TypeMoq.Mock.ofInstance(accountManagementTestService);
 	mockAccountManagementService.setup(x => x.getSecurityToken(TypeMoq.It.isAny(), TypeMoq.It.isAny()))
@@ -231,7 +231,7 @@ function getMockAccountManagementService(resolveSecurityToken: boolean): TypeMoq
 	return mockAccountManagementService;
 }
 
-function getMockResourceProvider(resolveCreateFirewallRule: boolean, response?: azdata.CreateFirewallRuleResponse): TypeMoq.Mock<TestResourceProvider> {
+function getMockResourceProvider(resolveCreateFirewallRule: boolean, response?: azdata.CreateFirewallRuleResponse): TypeMoq.IMock<TestResourceProvider> {
 	let resourceProviderStub = new TestResourceProvider();
 	let mockResourceProvider = TypeMoq.Mock.ofInstance(resourceProviderStub);
 	mockResourceProvider.setup(x => x.createFirewallRule(TypeMoq.It.isAny(), TypeMoq.It.isAny(), TypeMoq.It.isAny()))
@@ -239,7 +239,7 @@ function getMockResourceProvider(resolveCreateFirewallRule: boolean, response?: 
 	return mockResourceProvider;
 }
 
-function getMockErrorMessageService(deferredPromise: Deferred<{}>): TypeMoq.Mock<TestErrorMessageService> {
+function getMockErrorMessageService(deferredPromise: Deferred<{}>): TypeMoq.IMock<TestErrorMessageService> {
 	let errorMessageServiceStub = new TestErrorMessageService();
 	let mockErrorMessageService = TypeMoq.Mock.ofInstance(errorMessageServiceStub);
 	mockErrorMessageService.setup(x => x.showDialog(TypeMoq.It.isAny(), TypeMoq.It.isAny(), TypeMoq.It.isAny())).callback(() => {

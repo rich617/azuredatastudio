@@ -5158,8 +5158,8 @@ declare module 'azdata' {
 		export interface IMessage {
 			type: Channel;
 			header: IHeader;
-			parent_header: IHeader | {};
-			metadata: {};
+			parent_header: IHeader | { [key: string]: any };
+			metadata: { [key: string]: any };
 			content: any;
 		}
 

@@ -6,14 +6,13 @@
 'use strict';
 import 'mocha';
 import * as vscode from 'vscode';
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import { AppContext } from '../../../appContext';
 import { ApiWrapper } from '../../../apiWrapper';
 import { CmsResourceTreeProvider } from '../../../cmsResource/tree/treeProvider';
 import { CmsResourceMessageTreeNode } from '../../../cmsResource/messageTreeNode';
 import { CmsResourceEmptyTreeNode } from '../../../cmsResource/tree/cmsResourceEmptyTreeNode';
-import { CmsResourceTreeNode } from '../../../cmsResource/tree/cmsResourceTreeNode';
 import { CmsUtils } from '../../../cmsUtils';
 
 // Mock services
@@ -33,20 +32,20 @@ describe('CmsResourceTreeProvider.getChildren', function (): void {
 
 	it('Should not be initialized.', async function (): Promise<void> {
 		const treeProvider = new CmsResourceTreeProvider(mockAppContext);
-		should.notEqual(treeProvider.isSystemInitialized, true);
+		assert.notEqual(treeProvider.isSystemInitialized, true);
 		const children = await treeProvider.getChildren(undefined);
-		should.equal(children.length, 1);
-		should.equal(children[0].parent, undefined);
-		should.equal(children[0] instanceof CmsResourceMessageTreeNode, true);
+		assert.equal(children.length, 1);
+		assert.equal(children[0].parent, undefined);
+		assert.equal(children[0] instanceof CmsResourceMessageTreeNode, true);
 	});
 
 	it('Should not be loading after initialized.', async function (): Promise<void> {
 		const treeProvider = new CmsResourceTreeProvider(mockAppContext);
 		treeProvider.isSystemInitialized = true;
-		should.equal(true, treeProvider.isSystemInitialized);
+		assert.equal(true, treeProvider.isSystemInitialized);
 		mockCmsUtils.setup(x => x.registeredCmsServers).returns(() => []);
 		const children = await treeProvider.getChildren(undefined);
-		should.equal(children[0] instanceof CmsResourceEmptyTreeNode, true);
+		assert.equal(children[0] instanceof CmsResourceEmptyTreeNode, true);
 	});
 
 	it('Should show CMS nodes if there are cached servers', async function (): Promise<void> {
@@ -61,6 +60,6 @@ describe('CmsResourceTreeProvider.getChildren', function (): void {
 			}];
 		});
 		const children = await treeProvider.getChildren(undefined);
-		should.equal(children[0] !== null, true);
+		assert.equal(children[0] !== null, true);
 	});
 });

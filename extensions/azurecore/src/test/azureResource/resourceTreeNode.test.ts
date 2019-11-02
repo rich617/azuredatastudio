@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as azdata from 'azdata';
 import * as vscode from 'vscode';
@@ -87,7 +87,7 @@ let mockResourceProvider: TypeMoq.IMock<azureResource.IAzureResourceProvider>;
 let resourceService: AzureResourceService;
 let appContext: AppContext;
 
-describe('AzureResourceResourceTreeNode.info', function(): void {
+describe('AzureResourceResourceTreeNode.info', function (): void {
 	beforeEach(() => {
 		mockResourceTreeDataProvider = TypeMoq.Mock.ofType<azureResource.IAzureResourceTreeDataProvider>();
 		mockResourceTreeDataProvider.setup((o) => o.getTreeItem(mockResourceRootNode)).returns(() => mockResourceRootNode.treeItem);
@@ -105,29 +105,29 @@ describe('AzureResourceResourceTreeNode.info', function(): void {
 		appContext.registerService(AzureResourceServiceNames.resourceService, resourceService);
 	});
 
-	it('Should be correct when created.', async function(): Promise<void> {
+	it('Should be correct when created.', async function (): Promise<void> {
 		const resourceTreeNode = new AzureResourceResourceTreeNode({
 			resourceProviderId: mockResourceProviderId,
 			resourceNode: mockResourceRootNode
 		}, undefined, appContext);
 
-		should(resourceTreeNode.nodePathValue).equal(mockResourceRootNode.treeItem.id);
+		assert.equal(resourceTreeNode.nodePathValue, mockResourceRootNode.treeItem.id);
 
 		const treeItem = await resourceTreeNode.getTreeItem();
-		should(treeItem.id).equal(mockResourceRootNode.treeItem.id);
-		should(treeItem.label).equal(mockResourceRootNode.treeItem.label);
-		should(treeItem.collapsibleState).equal(mockResourceRootNode.treeItem.collapsibleState);
-		should(treeItem.contextValue).equal(mockResourceRootNode.treeItem.contextValue);
+		assert.equal(treeItem.id, mockResourceRootNode.treeItem.id);
+		assert.equal(treeItem.label, mockResourceRootNode.treeItem.label);
+		assert.equal(treeItem.collapsibleState, mockResourceRootNode.treeItem.collapsibleState);
+		assert.equal(treeItem.contextValue, mockResourceRootNode.treeItem.contextValue);
 
 		const nodeInfo = resourceTreeNode.getNodeInfo();
-		should(nodeInfo.label).equal(mockResourceRootNode.treeItem.label);
-		should(nodeInfo.isLeaf).equal(mockResourceRootNode.treeItem.collapsibleState === vscode.TreeItemCollapsibleState.None);
-		should(nodeInfo.nodeType).equal(mockResourceRootNode.treeItem.contextValue);
-		should(nodeInfo.iconType).equal(mockResourceRootNode.treeItem.contextValue);
+		assert.equal(nodeInfo.label, mockResourceRootNode.treeItem.label);
+		assert.equal(nodeInfo.isLeaf, mockResourceRootNode.treeItem.collapsibleState === vscode.TreeItemCollapsibleState.None);
+		assert.equal(nodeInfo.nodeType, mockResourceRootNode.treeItem.contextValue);
+		assert.equal(nodeInfo.iconType, mockResourceRootNode.treeItem.contextValue);
 	});
 });
 
-describe('AzureResourceResourceTreeNode.getChildren', function(): void {
+describe('AzureResourceResourceTreeNode.getChildren', function (): void {
 	beforeEach(() => {
 		mockResourceTreeDataProvider = TypeMoq.Mock.ofType<azureResource.IAzureResourceTreeDataProvider>();
 		mockResourceTreeDataProvider.setup((o) => o.getChildren(mockResourceRootNode)).returns(() => Promise.resolve(mockResourceNodes));
@@ -145,38 +145,38 @@ describe('AzureResourceResourceTreeNode.getChildren', function(): void {
 		appContext.registerService(AzureResourceServiceNames.resourceService, resourceService);
 	});
 
-	it('Should return resource nodes when it is container node.', async function(): Promise<void> {
+	it('Should return resource nodes when it is container node.', async function (): Promise<void> {
 		const resourceTreeNode = new AzureResourceResourceTreeNode({
 			resourceProviderId: mockResourceProviderId,
 			resourceNode: mockResourceRootNode
 		},
-		undefined, appContext);
+			undefined, appContext);
 
 		const children = await resourceTreeNode.getChildren();
 
 		mockResourceTreeDataProvider.verify((o) => o.getChildren(mockResourceRootNode), TypeMoq.Times.once());
 
-		should(children).Array();
-		should(children.length).equal(mockResourceNodes.length);
+		assert(Array.isArray(children));
+		assert.equal(children.length, mockResourceNodes.length);
 
 		for (let ix = 0; ix < children.length; ix++) {
 			const child = children[ix];
 
-			should(child).instanceOf(AzureResourceResourceTreeNode);
+			assert(child instanceof AzureResourceResourceTreeNode);
 
 			const childNode = (child as AzureResourceResourceTreeNode).resourceNodeWithProviderId;
-			should(childNode.resourceProviderId).equal(mockResourceProviderId);
-			should(childNode.resourceNode.account).equal(mockAccount);
-			should(childNode.resourceNode.subscription).equal(mockSubscription);
-			should(childNode.resourceNode.tenantId).equal(mockTenantId);
-			should(childNode.resourceNode.treeItem.id).equal(mockResourceNodes[ix].treeItem.id);
-			should(childNode.resourceNode.treeItem.label).equal(mockResourceNodes[ix].treeItem.label);
-			should(childNode.resourceNode.treeItem.collapsibleState).equal(mockResourceNodes[ix].treeItem.collapsibleState);
-			should(childNode.resourceNode.treeItem.contextValue).equal(mockResourceNodes[ix].treeItem.contextValue);
+			assert.equal(childNode.resourceProviderId, mockResourceProviderId);
+			assert.equal(childNode.resourceNode.account, mockAccount);
+			assert.equal(childNode.resourceNode.subscription, mockSubscription);
+			assert.equal(childNode.resourceNode.tenantId, mockTenantId);
+			assert.equal(childNode.resourceNode.treeItem.id, mockResourceNodes[ix].treeItem.id);
+			assert.equal(childNode.resourceNode.treeItem.label, mockResourceNodes[ix].treeItem.label);
+			assert.equal(childNode.resourceNode.treeItem.collapsibleState, mockResourceNodes[ix].treeItem.collapsibleState);
+			assert.equal(childNode.resourceNode.treeItem.contextValue, mockResourceNodes[ix].treeItem.contextValue);
 		}
 	});
 
-	it('Should return empty when it is leaf node.', async function(): Promise<void> {
+	it('Should return empty when it is leaf node.', async function (): Promise<void> {
 		const resourceTreeNode = new AzureResourceResourceTreeNode({
 			resourceProviderId: mockResourceProviderId,
 			resourceNode: mockResourceNode1
@@ -186,7 +186,7 @@ describe('AzureResourceResourceTreeNode.getChildren', function(): void {
 
 		mockResourceTreeDataProvider.verify((o) => o.getChildren(), TypeMoq.Times.exactly(0));
 
-		should(children).Array();
-		should(children.length).equal(0);
+		assert(Array.isArray(children));
+		assert.equal(children.length, 0);
 	});
 });

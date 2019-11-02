@@ -3,10 +3,8 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
 import * as vscode from 'vscode';
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as azdata from 'azdata';
 import 'mocha';
@@ -85,15 +83,15 @@ describe('AzureResourceTreeProvider.getChildren', function(): void {
 
 		mockAccountService.verify((o) => o.getAccounts(), TypeMoq.Times.once());
 
-		should(children).Array();
-		should(children.length).equal(mockAccounts.length);
+		assert(Array.isArray(children));
+		assert.equal(children.length, mockAccounts.length);
 
 		for (let ix = 0; ix < mockAccounts.length; ix++) {
 			const child = children[ix];
 			const account = mockAccounts[ix];
 
-			should(child).instanceof(AzureResourceAccountTreeNode);
-			should(child.nodePathValue).equal(`account_${account.key.accountId}`);
+			assert(child instanceof AzureResourceAccountTreeNode);
+			assert.equal(child.nodePathValue, `account_${account.key.accountId}`);
 		}
 	});
 
@@ -105,9 +103,9 @@ describe('AzureResourceTreeProvider.getChildren', function(): void {
 
 		const children = await treeProvider.getChildren(undefined);
 
-		should(children).Array();
-		should(children.length).equal(1);
-		should(children[0]).instanceof(AzureResourceAccountNotSignedInTreeNode);
+		assert(Array.isArray(children));
+		assert.equal(children.length, 1);
+		assert(children[0] instanceof AzureResourceAccountNotSignedInTreeNode);
 	});
 
 	xit('Should handle errors.', async function(): Promise<void> {
@@ -121,10 +119,10 @@ describe('AzureResourceTreeProvider.getChildren', function(): void {
 
 		mockAccountService.verify((o) => o.getAccounts(), TypeMoq.Times.once());
 
-		should(children).Array();
-		should(children.length).equal(1);
-		should(children[0]).instanceof(AzureResourceMessageTreeNode);
-		should(children[0].nodePathValue).startWith('message_');
-		should(children[0].getNodeInfo().label).equal(`Error: ${mockAccountError}`);
+		assert(Array.isArray(children));
+		assert.equal(children.length, 1);
+		assert(children[0] instanceof AzureResourceMessageTreeNode);
+		assert(children[0].nodePathValue.startsWith('message_'));
+		assert.equal(children[0].getNodeInfo().label, `Error: ${mockAccountError}`);
 	});
 });

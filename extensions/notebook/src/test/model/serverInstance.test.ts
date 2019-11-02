@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as stream from 'stream';
 import { ChildProcess } from 'child_process';
@@ -15,6 +15,7 @@ import { PerFolderServerInstance, ServerInstanceUtils } from '../../jupyter/serv
 import { MockOutputChannel } from '../common/stubs';
 import * as testUtils from '../common/testUtils';
 import { LocalJupyterServerManager } from '../../jupyter/jupyterServerManager';
+import { isUndefinedOrNull } from '../common';
 
 const successMessage = `[I 14:00:38.811 NotebookApp] The Jupyter Notebook is running at:
 [I 14:00:38.812 NotebookApp] http://localhost:8891/?token=...
@@ -49,8 +50,8 @@ describe('Jupyter server instance', function (): void {
 
 	it('Should not be started initially', function (): void {
 		// Given a new instance It should not be started
-		should(serverInstance.isStarted).be.false();
-		should(serverInstance.port).be.undefined();
+		assert(!serverInstance.isStarted);
+		assert(isUndefinedOrNull(serverInstance.port));
 	});
 
 	it('Should create config and data directories on configure', async function (): Promise<void> {
@@ -81,17 +82,17 @@ describe('Jupyter server instance', function (): void {
 		await serverInstance.start();
 
 		// Then I expect all parts of the URI to be defined
-		should(serverInstance.uri).not.be.undefined();
-		should(serverInstance.uri.scheme).equal('http');
+		assert(!isUndefinedOrNull(serverInstance.uri));
+		assert.equal(serverInstance.uri.scheme, 'http');
 		let settings = LocalJupyterServerManager.getLocalConnectionSettings(serverInstance.uri);
 		// Verify a token with expected length was generated
-		should(settings.token).have.length(48);
+		assert.equal(settings.token.length, 48);
 		let hostAndPort = serverInstance.uri.authority.split(':');
 		// verify port was set as expected
-		should(hostAndPort[1]).length(4);
+		assert.equal(hostAndPort[1], 4);
 
 		// And I expect it to be started
-		should(serverInstance.isStarted).be.true();
+		assert(serverInstance.isStarted);
 
 		// And I expect listeners to be cleaned up
 		process.verify(p => p.on(TypeMoq.It.isValue('error'), TypeMoq.It.isAny()), TypeMoq.Times.once());
@@ -122,7 +123,7 @@ describe('Jupyter server instance', function (): void {
 
 		// When I call start then I expect the error to be thrown
 		await testUtils.assertThrowsAsync(() => serverInstance.start(), undefined);
-		should(serverInstance.isStarted).be.false();
+		assert(!serverInstance.isStarted);
 	});
 
 	it('Should call stop with correct port on close', async function (): Promise<void> {
@@ -147,7 +148,7 @@ describe('Jupyter server instance', function (): void {
 		await serverInstance.stop();
 
 		// Then I expect stop to be called on the child process
-		should(actualCommand.indexOf(`jupyter notebook stop ${serverInstance.port}`)).be.greaterThan(-1);
+		assert(actualCommand.indexOf(`jupyter notebook stop ${serverInstance.port}`) > -1);
 		mockUtils.verify(u => u.removeDir(TypeMoq.It.isAny()), TypeMoq.Times.never());
 	});
 

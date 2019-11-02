@@ -3,9 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as azdata from 'azdata';
 import * as vscode from 'vscode';
@@ -100,18 +98,18 @@ describe('AzureResourceSubscriptionTreeNode.info', function(): void {
 	it('Should be correct when created.', async function(): Promise<void> {
 		const subscriptionTreeNode = new AzureResourceSubscriptionTreeNode(mockAccount, mockSubscription, mockTenantId, appContext, mockTreeChangeHandler.object, undefined);
 
-		should(subscriptionTreeNode.nodePathValue).equal(`account_${mockAccount.key.accountId}.subscription_${mockSubscription.id}.tenant_${mockTenantId}`);
+		assert.equal(subscriptionTreeNode.nodePathValue, `account_${mockAccount.key.accountId}.subscription_${mockSubscription.id}.tenant_${mockTenantId}`);
 
 		const treeItem = await subscriptionTreeNode.getTreeItem();
-		should(treeItem.label).equal(mockSubscription.name);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.Collapsed);
-		should(treeItem.contextValue).equal(AzureResourceItemType.subscription);
+		assert.equal(treeItem.label, mockSubscription.name);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.Collapsed);
+		assert.equal(treeItem.contextValue, AzureResourceItemType.subscription);
 
 		const nodeInfo = subscriptionTreeNode.getNodeInfo();
-		should(nodeInfo.label).equal(mockSubscription.name);
-		should(nodeInfo.isLeaf).equal(false);
-		should(nodeInfo.nodeType).equal(AzureResourceItemType.subscription);
-		should(nodeInfo.iconType).equal(AzureResourceItemType.subscription);
+		assert.equal(nodeInfo.label, mockSubscription.name);
+		assert(!nodeInfo.isLeaf);
+		assert.equal(nodeInfo.nodeType, AzureResourceItemType.subscription);
+		assert.equal(nodeInfo.iconType, AzureResourceItemType.subscription);
 	});
 });
 
@@ -160,10 +158,10 @@ describe('AzureResourceSubscriptionTreeNode.getChildren', function(): void {
 
 		const expectedChildren = await resourceService.listResourceProviderIds();
 
-		should(children).Array();
-		should(children.length).equal(expectedChildren.length);
+		assert(Array.isArray(children));
+		assert.equal(children.length, expectedChildren.length);
 		for (const child of children) {
-			should(child).instanceOf(AzureResourceResourceTreeNode);
+			assert(child instanceof AzureResourceResourceTreeNode);
 		}
 	});
 });

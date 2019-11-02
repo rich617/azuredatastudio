@@ -15,10 +15,10 @@ import { MockContextKeyService } from 'vs/platform/keybinding/test/common/mockKe
 
 // TESTS ///////////////////////////////////////////////////////////////////
 suite('auto OAuth dialog controller tests', () => {
-	let instantiationService: TypeMoq.Mock<InstantiationService>;
-	let mockAutoOAuthDialog: TypeMoq.Mock<AutoOAuthDialog>;
-	let mockAccountManagementService: TypeMoq.Mock<TestAccountManagementService>;
-	let mockErrorMessageService: TypeMoq.Mock<TestErrorMessageService>;
+	let instantiationService: TypeMoq.IMock<InstantiationService>;
+	let mockAutoOAuthDialog: TypeMoq.IMock<AutoOAuthDialog>;
+	let mockAccountManagementService: TypeMoq.IMock<TestAccountManagementService>;
+	let mockErrorMessageService: TypeMoq.IMock<TestErrorMessageService>;
 	let autoOAuthDialogController: AutoOAuthDialogController;
 
 	let mockOnCancelEvent: Emitter<void>;

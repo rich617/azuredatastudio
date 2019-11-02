@@ -20,10 +20,9 @@ suite('Client Session', function (): void {
 	let path = URI.file('my/notebook.ipynb');
 	let notebookManager: NotebookManagerStub;
 	let serverManager: ServerManagerStub;
-	let mockSessionManager: TypeMoq.Mock<nb.SessionManager>;
-	let notificationService: TypeMoq.Mock<INotificationService>;
+	let mockSessionManager: TypeMoq.IMock<nb.SessionManager>;
+	let notificationService: TypeMoq.IMock<INotificationService>;
 	let session: ClientSession;
-	let remoteSession: ClientSession;
 
 	setup(() => {
 		serverManager = new ServerManagerStub();
@@ -42,12 +41,6 @@ suite('Client Session', function (): void {
 
 		let serverlessNotebookManager = new NotebookManagerStub();
 		serverlessNotebookManager.sessionManager = mockSessionManager.object;
-		remoteSession = new ClientSession({
-			notebookManager: serverlessNotebookManager,
-			notebookUri: path,
-			notificationService: notificationService.object,
-			kernelSpec: undefined
-		});
 	});
 
 	test('Should set path, isReady and ready on construction', function (): void {

@@ -22,8 +22,8 @@ import { TestConnectionManagementService } from 'sql/platform/connection/test/co
 import { TestCapabilitiesService } from 'sql/platform/capabilities/test/common/testCapabilitiesService';
 
 suite('SQL Object Explorer Service tests', () => {
-	let sqlOEProvider: TypeMoq.Mock<TestObjectExplorerProvider>;
-	let connectionManagementService: TypeMoq.Mock<TestConnectionManagementService>;
+	let sqlOEProvider: TypeMoq.IMock<TestObjectExplorerProvider>;
+	let connectionManagementService: TypeMoq.IMock<TestConnectionManagementService>;
 	let connection: ConnectionProfile;
 	let connectionToFail: ConnectionProfile;
 	let conProfGroup: ConnectionProfileGroup;
@@ -36,7 +36,7 @@ suite('SQL Object Explorer Service tests', () => {
 	let sessionId = '1234';
 	let failedSessionId = '12345';
 	let numberOfSuccessfulSessions: number = 0;
-	let serverTreeView: TypeMoq.Mock<ServerTreeView>;
+	let serverTreeView: TypeMoq.IMock<ServerTreeView>;
 
 	setup(() => {
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { Mock, It, Times } from 'typemoq';
+import { Mock, IMock, It, Times } from 'typemoq';
 import { MainThreadModelViewDialog } from 'sql/workbench/api/browser/mainThreadModelViewDialog';
 import { IExtHostContext } from 'vs/workbench/api/common/extHost.protocol';
 import { IModelViewButtonDetails, IModelViewTabDetails, IModelViewDialogDetails, IModelViewWizardPageDetails, IModelViewWizardDetails, DialogMessage, MessageLevel } from 'sql/workbench/api/common/sqlExtHostTypes';
@@ -16,8 +16,8 @@ import { Emitter } from 'vs/base/common/event';
 
 suite('MainThreadModelViewDialog Tests', () => {
 	let mainThreadModelViewDialog: MainThreadModelViewDialog;
-	let mockExtHostModelViewDialog: Mock<ExtHostModelViewDialogShape>;
-	let mockDialogService: Mock<CustomDialogService>;
+	let mockExtHostModelViewDialog: IMock<ExtHostModelViewDialogShape>;
+	let mockDialogService: IMock<CustomDialogService>;
 	let openedDialog: Dialog;
 	let openedWizard: Wizard;
 

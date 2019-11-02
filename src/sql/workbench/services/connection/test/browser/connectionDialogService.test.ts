@@ -16,14 +16,14 @@ import { MockContextKeyService } from 'vs/platform/keybinding/test/common/mockKe
 suite('ConnectionDialogService tests', () => {
 
 	let connectionDialogService: ConnectionDialogService;
-	let mockConnectionManagementService: TypeMoq.Mock<ConnectionManagementService>;
-	let mockConnectionDialog: TypeMoq.Mock<ConnectionDialogWidget>;
+	let mockConnectionManagementService: TypeMoq.IMock<ConnectionManagementService>;
+	let mockConnectionDialog: TypeMoq.IMock<ConnectionDialogWidget>;
 
 	setup(() => {
 		let errorMessageService = getMockErrorMessageService();
 		connectionDialogService = new ConnectionDialogService(undefined, undefined, undefined, errorMessageService.object,
 			undefined, undefined, undefined);
-		mockConnectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Strict, {}, {}, new TestStorageService());
+		mockConnectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Strict, true, {}, {}, new TestStorageService());
 		(connectionDialogService as any)._connectionManagementService = mockConnectionManagementService.object;
 		mockConnectionDialog = TypeMoq.Mock.ofType(ConnectionDialogWidget, TypeMoq.MockBehavior.Strict,
 			undefined,
@@ -40,7 +40,7 @@ suite('ConnectionDialogService tests', () => {
 		(connectionDialogService as any)._connectionDialog = mockConnectionDialog.object;
 	});
 
-	function getMockErrorMessageService(): TypeMoq.Mock<TestErrorMessageService> {
+	function getMockErrorMessageService(): TypeMoq.IMock<TestErrorMessageService> {
 		let mockMessageService = TypeMoq.Mock.ofType(TestErrorMessageService);
 		mockMessageService.setup(x => x.showDialog(TypeMoq.It.isAny(), TypeMoq.It.isAny(), TypeMoq.It.isAny()));
 		return mockMessageService;

@@ -19,7 +19,7 @@ import { deepClone, deepFreeze } from 'vs/base/common/objects';
 import { ConfigurationTarget } from 'vs/platform/configuration/common/configuration';
 
 suite('ConnectionConfig', () => {
-	let capabilitiesService: TypeMoq.Mock<ICapabilitiesService>;
+	let capabilitiesService: TypeMoq.IMock<ICapabilitiesService>;
 	let msSQLCapabilities: ProviderFeatures;
 	let capabilities: ProviderFeatures[];
 	let onCapabilitiesRegistered = new Emitter<ProviderFeatures>();

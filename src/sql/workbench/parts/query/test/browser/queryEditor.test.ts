@@ -25,11 +25,11 @@ import { TestStorageService } from 'vs/workbench/test/workbenchTestServices';
 import { TestConfigurationService } from 'vs/platform/configuration/test/common/testConfigurationService';
 
 suite('SQL QueryEditor Tests', () => {
-	let instantiationService: TypeMoq.Mock<InstantiationService>;
-	let editorDescriptorService: TypeMoq.Mock<EditorDescriptorService>;
-	let connectionManagementService: TypeMoq.Mock<ConnectionManagementService>;
-	let configurationService: TypeMoq.Mock<TestConfigurationService>;
-	let memento: TypeMoq.Mock<Memento>;
+	let instantiationService: TypeMoq.IMock<InstantiationService>;
+	let editorDescriptorService: TypeMoq.IMock<EditorDescriptorService>;
+	let connectionManagementService: TypeMoq.IMock<ConnectionManagementService>;
+	let configurationService: TypeMoq.IMock<TestConfigurationService>;
+	let memento: TypeMoq.IMock<Memento>;
 
 	let mockEditor: any;
 
@@ -86,9 +86,9 @@ suite('SQL QueryEditor Tests', () => {
 		});
 
 		// Mock ConnectionManagementService
-		memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, '');
+		memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, true, '');
 		memento.setup(x => x.getMemento(TypeMoq.It.isAny())).returns(() => void 0);
-		connectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, memento.object, undefined, new TestStorageService());
+		connectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, true, memento.object, undefined, new TestStorageService());
 		connectionManagementService.callBase = true;
 		connectionManagementService.setup(x => x.isConnected(TypeMoq.It.isAny())).returns(() => false);
 		connectionManagementService.setup(x => x.disconnectEditor(TypeMoq.It.isAny())).returns(() => void 0);
@@ -245,16 +245,16 @@ suite('SQL QueryEditor Tests', () => {
 	*/
 
 	suite('Action Tests', () => {
-		let queryActionInstantiationService: TypeMoq.Mock<InstantiationService>;
-		let queryConnectionService: TypeMoq.Mock<ConnectionManagementService>;
-		let queryModelService: TypeMoq.Mock<QueryModelService>;
+		let queryActionInstantiationService: TypeMoq.IMock<InstantiationService>;
+		let queryConnectionService: TypeMoq.IMock<ConnectionManagementService>;
+		let queryModelService: TypeMoq.IMock<QueryModelService>;
 		let queryInput: QueryInput;
 		setup(() => {
 
 			// Mock ConnectionManagementService but don't set connected state
-			memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, '');
+			memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, true, '');
 			memento.setup(x => x.getMemento(TypeMoq.It.isAny())).returns(() => void 0);
-			queryConnectionService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, memento.object, undefined, new TestStorageService());
+			queryConnectionService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, true, memento.object, undefined, new TestStorageService());
 			queryConnectionService.callBase = true;
 
 			queryConnectionService.setup(x => x.disconnectEditor(TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(() => void 0);

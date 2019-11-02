@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as azdata from 'azdata';
 import * as vscode from 'vscode';
@@ -14,6 +14,7 @@ import { ApiWrapper } from '../../../../apiWrapper';
 import { AzureResourceDatabaseTreeDataProvider } from '../../../../azureResource/providers/database/databaseTreeDataProvider';
 import { AzureResourceItemType } from '../../../../azureResource/constants';
 import { IAzureResourceService, AzureResourceDatabase } from '../../../../azureResource/interfaces';
+import { isUndefinedOrNull } from '../../../common/types';
 
 // Mock services
 let mockDatabaseService: TypeMoq.IMock<IAzureResourceService<AzureResourceDatabase>>;
@@ -88,10 +89,10 @@ describe('AzureResourceDatabaseTreeDataProvider.info', function (): void {
 		const treeDataProvider = new AzureResourceDatabaseTreeDataProvider(mockDatabaseService.object, mockApiWrapper.object, mockExtensionContext.object);
 
 		const treeItem = await treeDataProvider.getTreeItem(mockResourceRootNode);
-		should(treeItem.id).equal(mockResourceRootNode.treeItem.id);
-		should(treeItem.label).equal(mockResourceRootNode.treeItem.label);
-		should(treeItem.collapsibleState).equal(mockResourceRootNode.treeItem.collapsibleState);
-		should(treeItem.contextValue).equal(mockResourceRootNode.treeItem.contextValue);
+		assert.equal(treeItem.id, mockResourceRootNode.treeItem.id);
+		assert.equal(treeItem.label, mockResourceRootNode.treeItem.label);
+		assert.equal(treeItem.collapsibleState, mockResourceRootNode.treeItem.collapsibleState);
+		assert.equal(treeItem.contextValue, mockResourceRootNode.treeItem.contextValue);
 	});
 });
 
@@ -111,17 +112,17 @@ describe('AzureResourceDatabaseTreeDataProvider.getChildren', function (): void 
 
 		const children = await treeDataProvider.getChildren();
 
-		should(children).Array();
-		should(children.length).equal(1);
+		assert(Array.isArray(children));
+		assert.equal(children.length, 1);
 
 		const child = children[0];
-		should(child.account).undefined();
-		should(child.subscription).undefined();
-		should(child.tenantId).undefined();
-		should(child.treeItem.id).equal('azure.resource.providers.database.treeDataProvider.databaseContainer');
-		should(child.treeItem.label).equal('SQL Databases');
-		should(child.treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.Collapsed);
-		should(child.treeItem.contextValue).equal('azure.resource.itemType.databaseContainer');
+		assert(isUndefinedOrNull(child.account));
+		assert(isUndefinedOrNull(child.subscription));
+		assert(isUndefinedOrNull(child.tenantId));
+		assert.equal(child.treeItem.id, 'azure.resource.providers.database.treeDataProvider.databaseContainer');
+		assert.equal(child.treeItem.label, 'SQL Databases');
+		assert.equal(child.treeItem.collapsibleState, vscode.TreeItemCollapsibleState.Collapsed);
+		assert.equal(child.treeItem.contextValue, 'azure.resource.itemType.databaseContainer');
 	});
 
 	it('Should return resource nodes when it is container node.', async function (): Promise<void> {
@@ -129,20 +130,20 @@ describe('AzureResourceDatabaseTreeDataProvider.getChildren', function (): void 
 
 		const children = await treeDataProvider.getChildren(mockResourceRootNode);
 
-		should(children).Array();
-		should(children.length).equal(mockDatabases.length);
+		assert(Array.isArray(children));
+		assert.equal(children.length, mockDatabases.length);
 
 		for (let ix = 0; ix < children.length; ix++) {
 			const child = children[ix];
 			const database = mockDatabases[ix];
 
-			should(child.account).equal(mockAccount);
-			should(child.subscription).equal(mockSubscription);
-			should(child.tenantId).equal(mockTenantId);
-			should(child.treeItem.id).equal(`databaseServer_${database.serverFullName}.database_${database.name}`);
-			should(child.treeItem.label).equal(`${database.name} (${database.serverName})`);
-			should(child.treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.Collapsed);
-			should(child.treeItem.contextValue).equal(AzureResourceItemType.database);
+			assert.equal(child.account, mockAccount);
+			assert.equal(child.subscription, mockSubscription);
+			assert.equal(child.tenantId, mockTenantId);
+			assert.equal(child.treeItem.id, `databaseServer_${database.serverFullName}.database_${database.name}`);
+			assert.equal(child.treeItem.label, `${database.name} (${database.serverName})`);
+			assert.equal(child.treeItem.collapsibleState, vscode.TreeItemCollapsibleState.Collapsed);
+			assert.equal(child.treeItem.contextValue, AzureResourceItemType.database);
 		}
 	});
 });

@@ -84,7 +84,7 @@ suite('Advanced properties dialog tests', () => {
 	test('advanced dialog should open when showDialog in advancedController get called', () => {
 		let isAdvancedDialogCalled = false;
 		let options: { [name: string]: any } = {};
-		let advanceDialog = TypeMoq.Mock.ofType(OptionsDialog, TypeMoq.MockBehavior.Strict,
+		let advanceDialog = TypeMoq.Mock.ofType(OptionsDialog, TypeMoq.MockBehavior.Strict, true,
 			'', // title
 			'', // name
 			{}, // options

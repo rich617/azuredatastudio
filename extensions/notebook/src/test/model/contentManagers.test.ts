@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as path from 'path';
 import { ContentsManager, Contents } from '@jupyterlab/services';
@@ -14,6 +14,7 @@ import 'mocha';
 import { INotebook, CellTypes } from '../../contracts/content';
 import { RemoteContentManager } from '../../jupyter/remoteContentManager';
 import * as testUtils from '../common/testUtils';
+import { isUndefinedOrNull } from '../common';
 
 let expectedNotebookContent: INotebook = {
 	cells: [{
@@ -33,12 +34,12 @@ let expectedNotebookContent: INotebook = {
 };
 
 function verifyMatchesExpectedNotebook(notebook: nb.INotebookContents): void {
-	should(notebook.cells).have.length(1, 'Expected 1 cell');
-	should(notebook.cells[0].cell_type).equal(CellTypes.Code);
-	should(notebook.cells[0].source).equal(expectedNotebookContent.cells[0].source);
-	should(notebook.metadata.kernelspec.name).equal(expectedNotebookContent.metadata.kernelspec.name);
-	should(notebook.nbformat).equal(expectedNotebookContent.nbformat);
-	should(notebook.nbformat_minor).equal(expectedNotebookContent.nbformat_minor);
+	assert.equal(notebook.cells.length, 1, 'Expected 1 cell');
+	assert.equal(notebook.cells[0].cell_type, CellTypes.Code);
+	assert.equal(notebook.cells[0].source, expectedNotebookContent.cells[0].source);
+	assert.equal(notebook.metadata.kernelspec.name, expectedNotebookContent.metadata.kernelspec.name);
+	assert.equal(notebook.nbformat, expectedNotebookContent.nbformat);
+	assert.equal(notebook.nbformat_minor, expectedNotebookContent.nbformat_minor);
 }
 
 describe('Remote Content Manager', function (): void {
@@ -89,6 +90,6 @@ describe('Remote Content Manager', function (): void {
 		// when I read the content
 		let notebook = await contentManager.getNotebookContents(vscode.Uri.file(remotePath));
 		// then I expect notebook format to match
-		should(notebook).be.undefined();
+		assert(isUndefinedOrNull(notebook));
 	});
 });

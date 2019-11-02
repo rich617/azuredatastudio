@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as vscode from 'vscode';
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as path from 'path';
 import * as fs from 'fs-extra';
@@ -24,13 +24,13 @@ export interface ExpectedBookItem {
 }
 
 export function equalBookItems(book: BookTreeItem, expectedBook: ExpectedBookItem): void {
-	should(book.title).equal(expectedBook.title);
-	should(book.uri).equal(expectedBook.url);
+	assert.equal(book.title, expectedBook.title);
+	assert.equal(book.uri, expectedBook.url);
 	if (expectedBook.previousUri || expectedBook.nextUri) {
 		let prevUri = book.previousUri ? book.previousUri.toLocaleLowerCase() : undefined;
-		should(prevUri).equal(expectedBook.previousUri);
+		assert.equal(prevUri, expectedBook.previousUri);
 		let nextUri = book.nextUri ? book.nextUri.toLocaleLowerCase() : undefined;
-		should(nextUri).equal(expectedBook.nextUri);
+		assert.equal(nextUri, expectedBook.nextUri);
 	}
 }
 
@@ -120,16 +120,16 @@ describe('BookTreeViewProviderTests @UNSTABLE@', function() {
 
 		it('should return all book nodes when element is undefined', async function (): Promise<void> {
 			const children = await bookTreeViewProvider.getChildren();
-			should(children).be.Array();
-			should(children.length).equal(1);
+			assert(Array.isArray(children));
+			assert.equal(children.length, 1);
 			book = children[0];
-			should(book.title).equal(expectedBook.title);
+			assert.equal(book.title, expectedBook.title);
 		});
 
 		it('should return all page nodes when element is a book', async function (): Promise<void> {
 			const children = await bookTreeViewProvider.getChildren(book);
-			should(children).be.Array();
-			should(children.length).equal(3);
+			assert(Array.isArray(children));
+			assert.equal(children.length, 3);
 			notebook1 = children[0];
 			const markdown = children[1];
 			const externalLink = children[2];
@@ -140,8 +140,8 @@ describe('BookTreeViewProviderTests @UNSTABLE@', function() {
 
 		it('should return all sections when element is a notebook', async function (): Promise<void> {
 			const children = await bookTreeViewProvider.getChildren(notebook1);
-			should(children).be.Array();
-			should(children.length).equal(2);
+			assert(Array.isArray(children));
+			assert.equal(children.length, 2);
 			const notebook2 = children[0];
 			const notebook3 = children[1];
 			equalBookItems(notebook2, expectedNotebook2);
@@ -187,7 +187,7 @@ describe('BookTreeViewProviderTests @UNSTABLE@', function() {
 		it('should ignore toc.yml files not in _data folder', function(): void {
 			bookTreeViewProvider.currentBook.getTableOfContentFiles(folder.uri.toString());
 			for (let p of bookTreeViewProvider.currentBook.tableOfContentPaths) {
-				should(p.toLocaleLowerCase()).equal(tableOfContentsFile.replace(/\\/g, '/').toLocaleLowerCase());
+				assert.equal(p.toLocaleLowerCase(), tableOfContentsFile.replace(/\\/g, '/').toLocaleLowerCase());
 			}
 		});
 
@@ -228,12 +228,12 @@ describe('BookTreeViewProviderTests @UNSTABLE@', function() {
 
 		it('should show error message if config.yml file not found', function(): void {
 			bookTreeViewProvider.currentBook.readBooks();
-			should(bookTreeViewProvider.errorMessage.toLocaleLowerCase()).equal(('ENOENT: no such file or directory, open \'' + configFile + '\'').toLocaleLowerCase());
+			assert.equal(bookTreeViewProvider.errorMessage.toLocaleLowerCase(), ('ENOENT: no such file or directory, open \'' + configFile + '\'').toLocaleLowerCase());
 		});
 		it('should show error if toc.yml file format is invalid', async function(): Promise<void> {
 			await fs.writeFile(configFile, 'title: Test Book');
 			bookTreeViewProvider.currentBook.readBooks();
-			should(bookTreeViewProvider.errorMessage).equal('Error: Test Book has an incorrect toc.yml file');
+			assert.equal(bookTreeViewProvider.errorMessage, 'Error: Test Book has an incorrect toc.yml file');
 		});
 
 		this.afterAll(async function () {
@@ -286,7 +286,7 @@ describe('BookTreeViewProviderTests @UNSTABLE@', function() {
 		it('should show error if notebook or markdown file is missing', async function(): Promise<void> {
 			let books = bookTreeViewProvider.currentBook.bookItems;
 			let children = await bookTreeViewProvider.currentBook.getSections({ sections: [] }, books[0].sections, rootFolderPath);
-			should(bookTreeViewProvider.errorMessage).equal('Missing file : Notebook1');
+			assert.equal(bookTreeViewProvider.errorMessage, 'Missing file : Notebook1');
 			// Rest of book should be detected correctly even with a missing file
 			equalBookItems(children[0], expectedNotebook2);
 		});

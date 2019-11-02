@@ -36,14 +36,14 @@ import { NullLogService } from 'vs/platform/log/common/log';
 suite('SQL ConnectionManagementService tests', () => {
 
 	let capabilitiesService: TestCapabilitiesService;
-	let connectionDialogService: TypeMoq.Mock<TestConnectionDialogService>;
-	let connectionStore: TypeMoq.Mock<ConnectionStore>;
-	let workbenchEditorService: TypeMoq.Mock<TestEditorService>;
+	let connectionDialogService: TypeMoq.IMock<TestConnectionDialogService>;
+	let connectionStore: TypeMoq.IMock<ConnectionStore>;
+	let workbenchEditorService: TypeMoq.IMock<TestEditorService>;
 	let connectionStatusManager: ConnectionStatusManager;
-	let mssqlConnectionProvider: TypeMoq.Mock<TestConnectionProvider>;
-	let workspaceConfigurationServiceMock: TypeMoq.Mock<TestConfigurationService>;
-	let resourceProviderStubMock: TypeMoq.Mock<TestResourceProvider>;
-	let accountManagementService: TypeMoq.Mock<TestAccountManagementService>;
+	let mssqlConnectionProvider: TypeMoq.IMock<TestConnectionProvider>;
+	let workspaceConfigurationServiceMock: TypeMoq.IMock<TestConfigurationService>;
+	let resourceProviderStubMock: TypeMoq.IMock<TestResourceProvider>;
+	let accountManagementService: TypeMoq.IMock<TestAccountManagementService>;
 
 	let none: void;
 
@@ -80,7 +80,7 @@ suite('SQL ConnectionManagementService tests', () => {
 
 		capabilitiesService = new TestCapabilitiesService();
 		connectionDialogService = TypeMoq.Mock.ofType(TestConnectionDialogService);
-		connectionStore = TypeMoq.Mock.ofType(ConnectionStore, TypeMoq.MockBehavior.Loose, new TestStorageService());
+		connectionStore = TypeMoq.Mock.ofType(ConnectionStore, TypeMoq.MockBehavior.Loose, true, new TestStorageService());
 		workbenchEditorService = TypeMoq.Mock.ofType(TestEditorService);
 		connectionStatusManager = new ConnectionStatusManager(capabilitiesService, new NullLogService(), TestEnvironmentService, new TestNotificationService());
 		mssqlConnectionProvider = TypeMoq.Mock.ofType(TestConnectionProvider);
@@ -927,7 +927,7 @@ suite('SQL ConnectionManagementService tests', () => {
 
 	test('getConnections test', () => {
 		const connectionStatusManagerMock = TypeMoq.Mock.ofType(ConnectionStatusManager, TypeMoq.MockBehavior.Loose);
-		const connectionStoreMock = TypeMoq.Mock.ofType(ConnectionStore, TypeMoq.MockBehavior.Loose, new TestStorageService());
+		const connectionStoreMock = TypeMoq.Mock.ofType(ConnectionStore, TypeMoq.MockBehavior.Loose, true, new TestStorageService());
 
 		connectionStatusManagerMock.setup(x => x.getActiveConnectionProfiles(undefined)).returns(() => {
 			return [createConnectionProfile('1'), createConnectionProfile('2')];

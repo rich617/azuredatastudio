@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as azdata from 'azdata';
 import * as vscode from 'vscode';
@@ -117,19 +117,19 @@ describe('AzureResourceAccountTreeNode.info', function (): void {
 		const accountTreeNodeId = `account_${mockAccount.key.accountId}`;
 		const accountTreeNodeLabel = `${mockAccount.displayInfo.displayName} (${mockAccount.key.accountId})`;
 
-		should(accountTreeNode.nodePathValue).equal(accountTreeNodeId);
+		assert.equal(accountTreeNode.nodePathValue, accountTreeNodeId);
 
 		const treeItem = await accountTreeNode.getTreeItem();
-		should(treeItem.id).equal(accountTreeNodeId);
-		should(treeItem.label).equal(accountTreeNodeLabel);
-		should(treeItem.contextValue).equal(AzureResourceItemType.account);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.Collapsed);
+		assert.equal(treeItem.id, accountTreeNodeId);
+		assert.equal(treeItem.label, accountTreeNodeLabel);
+		assert.equal(treeItem.contextValue, AzureResourceItemType.account);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.Collapsed);
 
 		const nodeInfo = accountTreeNode.getNodeInfo();
-		should(nodeInfo.label).equal(accountTreeNodeLabel);
-		should(nodeInfo.isLeaf).false();
-		should(nodeInfo.nodeType).equal(AzureResourceItemType.account);
-		should(nodeInfo.iconType).equal(AzureResourceItemType.account);
+		assert.equal(nodeInfo.label, accountTreeNodeLabel);
+		assert(!nodeInfo.isLeaf);
+		assert.equal(nodeInfo.nodeType, AzureResourceItemType.account);
+		assert.equal(nodeInfo.iconType, AzureResourceItemType.account);
 	});
 
 	it('Should be correct when there are subscriptions listed.', async function (): Promise<void> {
@@ -142,14 +142,14 @@ describe('AzureResourceAccountTreeNode.info', function (): void {
 
 		const subscriptionNodes = await accountTreeNode.getChildren();
 
-		should(subscriptionNodes).Array();
-		should(subscriptionNodes.length).equal(mockSubscriptions.length);
+		assert(Array.isArray(subscriptionNodes));
+		assert.equal(subscriptionNodes.length, mockSubscriptions.length);
 
 		const treeItem = await accountTreeNode.getTreeItem();
-		should(treeItem.label).equal(accountTreeNodeLabel);
+		assert.equal(treeItem.label, accountTreeNodeLabel);
 
 		const nodeInfo = accountTreeNode.getNodeInfo();
-		should(nodeInfo.label).equal(accountTreeNodeLabel);
+		assert.equal(nodeInfo.label, accountTreeNodeLabel);
 	});
 
 	it('Should be correct when there are subscriptions filtered.', async function (): Promise<void> {
@@ -162,14 +162,14 @@ describe('AzureResourceAccountTreeNode.info', function (): void {
 
 		const subscriptionNodes = await accountTreeNode.getChildren();
 
-		should(subscriptionNodes).Array();
-		should(subscriptionNodes.length).equal(mockFilteredSubscriptions.length);
+		assert(Array.isArray(subscriptionNodes));
+		assert.equal(subscriptionNodes.length, mockFilteredSubscriptions.length);
 
 		const treeItem = await accountTreeNode.getTreeItem();
-		should(treeItem.label).equal(accountTreeNodeLabel);
+		assert.equal(treeItem.label, accountTreeNodeLabel);
 
 		const nodeInfo = accountTreeNode.getNodeInfo();
-		should(nodeInfo.label).equal(accountTreeNodeLabel);
+		assert.equal(nodeInfo.label, accountTreeNodeLabel);
 	});
 });
 
@@ -215,21 +215,21 @@ describe('AzureResourceAccountTreeNode.getChildren', function (): void {
 
 		mockTreeChangeHandler.verify((o) => o.notifyNodeChanged(accountTreeNode), TypeMoq.Times.once());
 
-		should(accountTreeNode.totalSubscriptionCount).equal(mockSubscriptions.length);
-		should(accountTreeNode.selectedSubscriptionCount).equal(mockSubscriptions.length);
-		should(accountTreeNode.isClearingCache).false();
+		assert.equal(accountTreeNode.totalSubscriptionCount, mockSubscriptions.length);
+		assert.equal(accountTreeNode.selectedSubscriptionCount, mockSubscriptions.length);
+		assert(!accountTreeNode.isClearingCache);
 
-		should(children).Array();
-		should(children.length).equal(mockSubscriptions.length);
+		assert(Array.isArray(children));
+		assert.equal(children.length, mockSubscriptions.length);
 
-		should(mockSubscriptionCache).deepEqual(mockSubscriptions);
+		assert.deepEqual(mockSubscriptionCache, mockSubscriptions);
 
 		for (let ix = 0; ix < mockSubscriptions.length; ix++) {
 			const child = children[ix];
 			const subscription = mockSubscriptions[ix];
 
-			should(child).instanceof(AzureResourceSubscriptionTreeNode);
-			should(child.nodePathValue).equal(`account_${mockAccount.key.accountId}.subscription_${subscription.id}.tenant_${mockTenantId}`);
+			assert(child instanceof AzureResourceSubscriptionTreeNode);
+			assert.equal(child.nodePathValue, `account_${mockAccount.key.accountId}.subscription_${subscription.id}.tenant_${mockTenantId}`);
 		}
 	});
 
@@ -247,10 +247,10 @@ describe('AzureResourceAccountTreeNode.getChildren', function (): void {
 		mockCacheService.verify((o) => o.get(TypeMoq.It.isAnyString()), TypeMoq.Times.once());
 		mockCacheService.verify((o) => o.update(TypeMoq.It.isAnyString(), TypeMoq.It.isAny()), TypeMoq.Times.once());
 
-		should(children.length).equal(mockSubscriptionCache.length);
+		assert.equal(children.length, mockSubscriptionCache.length);
 
 		for (let ix = 0; ix < mockSubscriptionCache.length; ix++) {
-			should(children[ix].nodePathValue).equal(`account_${mockAccount.key.accountId}.subscription_${mockSubscriptionCache[ix].id}.tenant_${mockTenantId}`);
+			assert.equal(children[ix].nodePathValue, `account_${mockAccount.key.accountId}.subscription_${mockSubscriptionCache[ix].id}.tenant_${mockTenantId}`);
 		}
 	});
 
@@ -261,13 +261,13 @@ describe('AzureResourceAccountTreeNode.getChildren', function (): void {
 
 		const children = await accountTreeNode.getChildren();
 
-		should(accountTreeNode.totalSubscriptionCount).equal(0);
+		assert.equal(accountTreeNode.totalSubscriptionCount, 0);
 
-		should(children).Array();
-		should(children.length).equal(1);
-		should(children[0]).instanceof(AzureResourceMessageTreeNode);
-		should(children[0].nodePathValue).startWith('message_');
-		should(children[0].getNodeInfo().label).equal('No Subscriptions found.');
+		assert(Array.isArray(children));
+		assert.equal(children.length, 1);
+		assert(children[0] instanceof AzureResourceMessageTreeNode);
+		assert(children[0].nodePathValue.startsWith('message_'));
+		assert.equal(children[0].getNodeInfo().label, 'No Subscriptions found.');
 	});
 
 	it('Should honor subscription filtering.', async function (): Promise<void> {
@@ -280,11 +280,11 @@ describe('AzureResourceAccountTreeNode.getChildren', function (): void {
 
 		mockSubscriptionFilterService.verify((o) => o.getSelectedSubscriptions(mockAccount), TypeMoq.Times.once());
 
-		should(accountTreeNode.selectedSubscriptionCount).equal(mockFilteredSubscriptions.length);
-		should(children.length).equal(mockFilteredSubscriptions.length);
+		assert.equal(accountTreeNode.selectedSubscriptionCount, mockFilteredSubscriptions.length);
+		assert.equal(children.length, mockFilteredSubscriptions.length);
 
 		for (let ix = 0; ix < mockFilteredSubscriptions.length; ix++) {
-			should(children[ix].nodePathValue).equal(`account_${mockAccount.key.accountId}.subscription_${mockFilteredSubscriptions[ix].id}.tenant_${mockTenantId}`);
+			assert.equal(children[ix].nodePathValue, `account_${mockAccount.key.accountId}.subscription_${mockFilteredSubscriptions[ix].id}.tenant_${mockTenantId}`);
 		}
 	});
 
@@ -304,11 +304,11 @@ describe('AzureResourceAccountTreeNode.getChildren', function (): void {
 		mockCacheService.verify((o) => o.get(TypeMoq.It.isAnyString()), TypeMoq.Times.never());
 		mockCacheService.verify((o) => o.update(TypeMoq.It.isAnyString(), TypeMoq.It.isAny()), TypeMoq.Times.once());
 
-		should(children).Array();
-		should(children.length).equal(1);
-		should(children[0]).instanceof(AzureResourceMessageTreeNode);
-		should(children[0].nodePathValue).startWith('message_');
-		should(children[0].getNodeInfo().label).equal(`Error: ${mockError}`);
+		assert(Array.isArray(children));
+		assert.equal(children.length, 1);
+		assert(children[0] instanceof AzureResourceMessageTreeNode);
+		assert(children[0].nodePathValue.startsWith('message_'));
+		assert.equal(children[0].getNodeInfo().label, `Error: ${mockError}`);
 	});
 });
 
@@ -341,6 +341,6 @@ describe('AzureResourceAccountTreeNode.clearCache', function (): void {
 	it('Should clear cache.', async function (): Promise<void> {
 		const accountTreeNode = new AzureResourceAccountTreeNode(mockAccount, mockAppContext, mockTreeChangeHandler.object);
 		accountTreeNode.clearCache();
-		should(accountTreeNode.isClearingCache).true();
+		assert(accountTreeNode.isClearingCache);
 	});
 });

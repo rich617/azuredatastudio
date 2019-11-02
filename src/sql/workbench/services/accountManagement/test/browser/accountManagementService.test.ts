@@ -588,7 +588,7 @@ function getTestState(): AccountManagementState {
 	};
 }
 
-function getMockAccountProvider(): TypeMoq.Mock<azdata.AccountProvider> {
+function getMockAccountProvider(): TypeMoq.IMock<azdata.AccountProvider> {
 	let mockProvider = TypeMoq.Mock.ofType<azdata.AccountProvider>(AccountProviderStub);
 	mockProvider.setup(x => x.clear(TypeMoq.It.isAny())).returns(() => Promise.resolve());
 	mockProvider.setup(x => x.initialize(TypeMoq.It.isAny())).returns(param => Promise.resolve(param));
@@ -597,7 +597,7 @@ function getMockAccountProvider(): TypeMoq.Mock<azdata.AccountProvider> {
 	return mockProvider;
 }
 
-function getFailingMockAccountProvider(cancel: boolean): TypeMoq.Mock<azdata.AccountProvider> {
+function getFailingMockAccountProvider(cancel: boolean): TypeMoq.IMock<azdata.AccountProvider> {
 	let mockProvider = TypeMoq.Mock.ofType<azdata.AccountProvider>(AccountProviderStub);
 	mockProvider.setup(x => x.clear(TypeMoq.It.isAny()))
 		.returns(() => Promise.resolve());
@@ -620,8 +620,8 @@ function getFailingMockAccountProvider(cancel: boolean): TypeMoq.Mock<azdata.Acc
 
 interface AccountManagementState {
 	accountManagementService: AccountManagementService;
-	instantiationService: TypeMoq.Mock<InstantiationService>;
-	mockAccountStore: TypeMoq.Mock<IAccountStore>;
+	instantiationService: TypeMoq.IMock<InstantiationService>;
+	mockAccountStore: TypeMoq.IMock<IAccountStore>;
 	eventVerifierUpdate: EventVerifierSingle<UpdateAccountListEventParams>;
 	eventVerifierProviderAdded: EventVerifierSingle<AccountProviderAddedEventParams>;
 	eventVerifierProviderRemoved: EventVerifierSingle<azdata.AccountProviderMetadata>;

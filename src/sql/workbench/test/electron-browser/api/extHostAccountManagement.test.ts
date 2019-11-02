@@ -432,7 +432,7 @@ suite('ExtHostAccountManagement', () => {
 	});
 });
 
-function getMockAccountProvider(): TypeMoq.Mock<azdata.AccountProvider> {
+function getMockAccountProvider(): TypeMoq.IMock<azdata.AccountProvider> {
 	let mock = TypeMoq.Mock.ofType<azdata.AccountProvider>(AccountProviderStub);
 	mock.setup((obj) => obj.clear(TypeMoq.It.isValue(mockAccount.key)))
 		.returns(() => Promise.resolve(undefined));
@@ -446,7 +446,7 @@ function getMockAccountProvider(): TypeMoq.Mock<azdata.AccountProvider> {
 	return mock;
 }
 
-function getMockAccountManagementService(accounts: azdata.Account[]): TypeMoq.Mock<TestAccountManagementService> {
+function getMockAccountManagementService(accounts: azdata.Account[]): TypeMoq.IMock<TestAccountManagementService> {
 	let mockAccountManagementService = TypeMoq.Mock.ofType(TestAccountManagementService);
 
 	mockAccountManagementService.setup(x => x.getAccountsForProvider(TypeMoq.It.isAny()))

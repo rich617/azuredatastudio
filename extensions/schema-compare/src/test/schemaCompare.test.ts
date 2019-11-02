@@ -5,8 +5,7 @@
 
 'use strict';
 
-import * as should from 'should';
-import * as azdata from 'azdata';
+import * as assert from 'assert';
 import * as vscode from 'vscode';
 import * as mssql from '../../../mssql';
 import * as TypeMoq from 'typemoq';
@@ -14,23 +13,6 @@ import 'mocha';
 import { SchemaCompareDialog } from './../dialogs/schemaCompareDialog';
 import { SchemaCompareMainWindow } from '../schemaCompareMainWindow';
 import { SchemaCompareTestService } from './testSchemaCompareService';
-
-// Mock test data
-const mockConnectionProfile: azdata.IConnectionProfile = {
-	connectionName: 'My Connection',
-	serverName: 'My Server',
-	databaseName: 'My Server',
-	userName: 'My User',
-	password: 'My Pwd',
-	authenticationType: 'SqlLogin',
-	savePassword: false,
-	groupFullName: 'My groupName',
-	groupId: 'My GroupId',
-	providerName: 'My Server',
-	saveProfile: true,
-	id: 'My Id',
-	options: null
-};
 
 const mocksource: string = 'source.dacpac';
 const mocktarget: string = 'target.dacpac';
@@ -68,9 +50,9 @@ describe('SchemaCompareDialog.openDialog', function (): void {
 		let dialog = new SchemaCompareDialog(schemaCompareResult);
 		await dialog.openDialog();
 
-		should(dialog.dialog.title).equal('Schema Compare');
-		should(dialog.dialog.okButton.label).equal('OK');
-		should(dialog.dialog.okButton.enabled).equal(false); // Should be false when open
+		assert.equal(dialog.dialog.title, 'Schema Compare');
+		assert.equal(dialog.dialog.okButton.label, 'OK');
+		assert.equal(dialog.dialog.okButton.enabled, false); // Should be false when open
 	});
 });
 
@@ -87,12 +69,12 @@ describe('SchemaCompareResult.start', function (): void {
 		let promise = new Promise(resolve => setTimeout(resolve, 5000)); // to ensure comparison result view is initialized
 		await promise;
 
-		should(result.getComparisonResult() === undefined);
+		assert(result.getComparisonResult() === undefined);
 		result.sourceEndpointInfo = mockSourceEndpoint;
 		result.targetEndpointInfo = mockTargetEndpoint;
 		await result.execute();
 
-		should(result.getComparisonResult() !== undefined);
-		should(result.getComparisonResult().operationId === 'Test Operation Id');
+		assert(result.getComparisonResult() !== undefined);
+		assert(result.getComparisonResult().operationId === 'Test Operation Id');
 	});
 });

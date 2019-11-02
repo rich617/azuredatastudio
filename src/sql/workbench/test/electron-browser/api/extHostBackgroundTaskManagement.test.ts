@@ -5,7 +5,7 @@
 
 import * as azdata from 'azdata';
 import * as assert from 'assert';
-import { Mock, It, Times } from 'typemoq';
+import { Mock, IMock, It, Times } from 'typemoq';
 import { ExtHostBackgroundTaskManagement, TaskStatus } from 'sql/workbench/api/common/extHostBackgroundTaskManagement';
 import { MainThreadBackgroundTaskManagementShape } from 'sql/workbench/api/common/sqlExtHost.protocol';
 import { IMainContext } from 'vs/workbench/api/common/extHost.protocol';
@@ -13,7 +13,7 @@ import { IMainContext } from 'vs/workbench/api/common/extHost.protocol';
 
 suite('ExtHostBackgroundTaskManagement Tests', () => {
 	let extHostBackgroundTaskManagement: ExtHostBackgroundTaskManagement;
-	let mockProxy: Mock<MainThreadBackgroundTaskManagementShape>;
+	let mockProxy: IMock<MainThreadBackgroundTaskManagementShape>;
 	let nothing: void;
 	let operationId = 'operation is';
 	setup(() => {

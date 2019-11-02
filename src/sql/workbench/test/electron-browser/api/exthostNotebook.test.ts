@@ -20,9 +20,9 @@ import { mssqlProviderName } from 'sql/platform/connection/common/constants';
 suite('ExtHostNotebook Tests', () => {
 
 	let extHostNotebook: ExtHostNotebook;
-	let mockProxy: TypeMoq.Mock<MainThreadNotebookShape>;
+	let mockProxy: TypeMoq.IMock<MainThreadNotebookShape>;
 	let notebookUri: URI;
-	let notebookProviderMock: TypeMoq.Mock<NotebookProviderStub>;
+	let notebookProviderMock: TypeMoq.IMock<NotebookProviderStub>;
 	setup(() => {
 		mockProxy = TypeMoq.Mock.ofInstance(<MainThreadNotebookShape>{
 			$registerNotebookProvider: (providerId, handle) => undefined,

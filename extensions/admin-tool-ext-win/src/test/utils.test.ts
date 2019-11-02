@@ -5,7 +5,7 @@
 
 'use strict';
 
-import * as should from 'should';
+import * as assert from 'assert';
 import 'mocha';
 
 import { buildSsmsMinCommandArgs, buildUrn, LaunchSsmsDialogParams } from '../main';
@@ -23,7 +23,7 @@ describe('buildSsmsMinCommandArgs Method Tests', () => {
 			urn: 'Server\\Database\\Table'
 		};
 		const args = buildSsmsMinCommandArgs(params);
-		should(args).equal('-a "myAction" -S "myServer" -D "myDatabase" -U "user" -u "Server\\Database\\Table"');
+		assert.equal(args, '-a "myAction" -S "myServer" -D "myDatabase" -U "user" -u "Server\\Database\\Table"');
 	});
 
 	it('Should be built correctly with all params and UseAAD as true', function (): void {
@@ -37,7 +37,7 @@ describe('buildSsmsMinCommandArgs Method Tests', () => {
 		};
 		const args = buildSsmsMinCommandArgs(params);
 
-		should(args).equal('-a "myAction" -S "myServer" -D "myDatabase" -U "user" -G -u "Server\\Database\\Table"');
+		assert.equal(args, '-a "myAction" -S "myServer" -D "myDatabase" -U "user" -G -u "Server\\Database\\Table"');
 	});
 
 	it('Should be built correctly and names escaped correctly', function (): void {
@@ -51,7 +51,7 @@ describe('buildSsmsMinCommandArgs Method Tests', () => {
 		};
 		const args = buildSsmsMinCommandArgs(params);
 
-		should(args).equal('-a "myAction\'\\"/\\[]tricky" -S "myServer\'\\"/\\[]tricky" -D "myDatabase\'\\"/\\[]tricky" -U "user\'\\"/\\[]tricky" -G -u "Server\\Database[\'myDatabase\'\'\\"/\\[]tricky\']\\Table[\\"myTable\'\\"\\"/\\[]tricky\\"]"');
+		assert.equal(args, '-a "myAction\'\\"/\\[]tricky" -S "myServer\'\\"/\\[]tricky" -D "myDatabase\'\\"/\\[]tricky" -U "user\'\\"/\\[]tricky" -G -u "Server\\Database[\'myDatabase\'\'\\"/\\[]tricky\']\\Table[\\"myTable\'\\"\\"/\\[]tricky\\"]"');
 	});
 
 	it('Should be built correctly with only action and server', function (): void {
@@ -61,7 +61,7 @@ describe('buildSsmsMinCommandArgs Method Tests', () => {
 			server: 'myServer'
 		};
 		const args = buildSsmsMinCommandArgs(params);
-		should(args).equal('-a "myAction" -S "myServer"');
+		assert.equal(args, '-a "myAction" -S "myServer"');
 	});
 });
 
@@ -76,20 +76,20 @@ const escapedTableSchema = doubleEscapeSingleQuotes(tableSchema);
 
 describe('buildUrn Method Tests', () => {
 	it('Urn should be correct with just server', async function (): Promise<void> {
-		should(await buildUrn(undefined)).equal('Server');
+		assert.equal(await buildUrn(undefined), 'Server');
 	});
 
 	it('Urn should be correct with Server and only Databases folder', async function (): Promise<void> {
 		const leafNode: ExtHostObjectExplorerNodeStub =
 			new ExtHostObjectExplorerNodeStub('Databases', undefined, 'Folder', undefined);
-		should(await buildUrn(leafNode)).equal('Server');
+		assert.equal(await buildUrn(leafNode), 'Server');
 	});
 
 	it('Urn should be correct with Server and Database node', async function (): Promise<void> {
 		const leafNode: ExtHostObjectExplorerNodeStub =
 			new ExtHostObjectExplorerNodeStub('Databases', undefined, 'Folder', undefined)
 				.createChild(dbName, dbSchema, 'Database');
-		should(await buildUrn(leafNode)).equal(
+		assert.equal(await buildUrn(leafNode),
 			`Server/Database[@Name='${escapedDbName}' and @Schema='${escapedDbSchema}']`);
 	});
 
@@ -99,7 +99,7 @@ describe('buildUrn Method Tests', () => {
 				.createChild(dbName, dbSchema, 'Database')
 				.createChild('Tables', undefined, 'Folder')
 				.createChild(tableName, tableSchema, 'Table');
-		should(await buildUrn(rootNode)).equal(
+		assert.equal(await buildUrn(rootNode),
 			`Server/Database[@Name='${escapedDbName}' and @Schema='${escapedDbSchema}']/Table[@Name='${escapedTableName}' and @Schema='${escapedTableSchema}']`);
 	});
 });
@@ -108,13 +108,13 @@ describe('doubleEscapeSingleQuotes Method Tests', () => {
 	it('Should return original string if no single quotes', function (): void {
 		const testString: string = 'MyTestString';
 		const ret = doubleEscapeSingleQuotes(testString);
-		should(ret).equal(testString);
+		assert.equal(ret, testString);
 	});
 
 	it('Should return escaped original string if it contains single quotes', function (): void {
 		const testString: string = 'MyTestString\'\'WithQuotes';
 		const ret = doubleEscapeSingleQuotes(testString);
-		should(ret).equal('MyTestString\'\'\'\'WithQuotes');
+		assert.equal(ret, 'MyTestString\'\'\'\'WithQuotes');
 	});
 });
 
@@ -122,12 +122,12 @@ describe('backEscapeDoubleQuotes Method Tests', () => {
 	it('Should return original string if no double quotes', function (): void {
 		const testString: string = 'MyTestString';
 		const ret = backEscapeDoubleQuotes(testString);
-		should(ret).equal(testString);
+		assert.equal(ret, testString);
 	});
 
 	it('Should return escaped original string if it contains double quotes', function (): void {
 		const testString: string = 'MyTestString\"\"WithQuotes';
 		const ret = backEscapeDoubleQuotes(testString);
-		should(ret).equal('MyTestString\\"\\"WithQuotes');
+		assert.equal(ret, 'MyTestString\\"\\"WithQuotes');
 	});
 });

@@ -3,35 +3,34 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as should from 'should';
+import * as assert from 'assert';
 import * as vscode from 'vscode';
 import 'mocha';
 
 import { AzureResourceItemType } from '../../../azureResource/constants';
 import { AzureResourceAccountNotSignedInTreeNode } from '../../../azureResource/tree/accountNotSignedInTreeNode';
+import { isUndefinedOrNull } from '../../common/types';
 
-describe('AzureResourceAccountNotSignedInTreeNode.info', function(): void {
-	it('Should be correct.', async function(): Promise<void> {
+describe('AzureResourceAccountNotSignedInTreeNode.info', function (): void {
+	it('Should be correct.', async function (): Promise<void> {
 		const label = 'Sign in to Azure...';
 
 		const treeNode = new AzureResourceAccountNotSignedInTreeNode();
 
-		should(treeNode.nodePathValue).equal('message_accountNotSignedIn');
+		assert.equal(treeNode.nodePathValue, 'message_accountNotSignedIn');
 
 		const treeItem = await treeNode.getTreeItem();
-		should(treeItem.label).equal(label);
-		should(treeItem.contextValue).equal(AzureResourceItemType.message);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.None);
-		should(treeItem.command).not.undefined();
-		should(treeItem.command.title).equal(label);
-		should(treeItem.command.command).equal('azure.resource.signin');
+		assert.equal(treeItem.label, label);
+		assert.equal(treeItem.contextValue, AzureResourceItemType.message);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.None);
+		assert(!isUndefinedOrNull(treeItem.command));
+		assert.equal(treeItem.command.title, label);
+		assert.equal(treeItem.command.command, 'azure.resource.signin');
 
 		const nodeInfo = treeNode.getNodeInfo();
-		should(nodeInfo.isLeaf).true();
-		should(nodeInfo.label).equal(label);
-		should(nodeInfo.nodeType).equal(AzureResourceItemType.message);
-		should(nodeInfo.iconType).equal(AzureResourceItemType.message);
+		assert(nodeInfo.isLeaf);
+		assert.equal(nodeInfo.label, label);
+		assert.equal(nodeInfo.nodeType, AzureResourceItemType.message);
+		assert.equal(nodeInfo.iconType, AzureResourceItemType.message);
 	});
 });

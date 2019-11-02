@@ -11,7 +11,7 @@ import { NullLogService } from 'vs/platform/log/common/log';
 import { TelemetryService } from 'vs/platform/telemetry/common/telemetryService';
 
 suite('SQL Telemetry Utilities tests', () => {
-	let telemetryService: TypeMoq.Mock<ITelemetryService>;
+	let telemetryService: TypeMoq.IMock<ITelemetryService>;
 	let none: void;
 	let providerName: string = 'provider name';
 	let telemetryKey: string = 'tel key';
@@ -35,7 +35,7 @@ suite('SQL Telemetry Utilities tests', () => {
 	};
 
 	setup(() => {
-		telemetryService = TypeMoq.Mock.ofType(TelemetryService, TypeMoq.MockBehavior.Strict, Object.create(null));
+		telemetryService = TypeMoq.Mock.ofType(TelemetryService, TypeMoq.MockBehavior.Strict, true, Object.create(null));
 		telemetryService.setup(x => x.publicLog(TypeMoq.It.isAny(), TypeMoq.It.isAny())).returns(x => Promise.resolve(none));
 	});
 

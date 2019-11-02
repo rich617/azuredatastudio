@@ -5,7 +5,7 @@
 
 'use strict';
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as vscode from 'vscode';
 import 'mocha';
 
@@ -17,18 +17,18 @@ describe('CmsResourceMessageTreeNode.info', function (): void {
 		const mockMessage = 'Test message';
 		const treeNode = new CmsResourceMessageTreeNode(mockMessage, undefined);
 
-		should(treeNode.nodePathValue).startWith('message_');
+		assert(treeNode.nodePathValue.startsWith('message_'));
 
 		const treeItem = await treeNode.getTreeItem();
-		should(treeItem.label).equal(mockMessage);
-		should(treeItem.contextValue).equal(CmsResourceItemType.cmsMessageNodeContainer);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.None);
+		assert.equal(treeItem.label, mockMessage);
+		assert.equal(treeItem.contextValue, CmsResourceItemType.cmsMessageNodeContainer);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.None);
 
 		const nodeInfo = treeNode.getNodeInfo();
-		should(nodeInfo.isLeaf).true();
-		should(nodeInfo.label).equal(mockMessage);
-		should(nodeInfo.nodeType).equal(CmsResourceItemType.cmsMessageNodeContainer);
-		should(nodeInfo.iconType).equal(CmsResourceItemType.cmsMessageNodeContainer);
+		assert(nodeInfo.isLeaf);
+		assert.equal(nodeInfo.label, mockMessage);
+		assert.equal(nodeInfo.nodeType, CmsResourceItemType.cmsMessageNodeContainer);
+		assert.equal(nodeInfo.iconType, CmsResourceItemType.cmsMessageNodeContainer);
 	});
 });
 
@@ -36,6 +36,6 @@ describe('CmsResourceMessageTreeNode.create', function (): void {
 	it('Should create a message node.', async function (): Promise<void> {
 		const mockMessage = 'Test messagse';
 		const treeNode = CmsResourceMessageTreeNode.create(mockMessage, undefined);
-		should(treeNode).instanceof(CmsResourceMessageTreeNode);
+		assert(treeNode instanceof CmsResourceMessageTreeNode);
 	});
 });

@@ -17,13 +17,13 @@ import { TestCapabilitiesService } from 'sql/platform/capabilities/test/common/t
 suite('ServerTreeView onAddConnectionProfile handler tests', () => {
 
 	let serverTreeView: ServerTreeView;
-	let mockTree: TypeMoq.Mock<Tree>;
-	let mockRefreshTreeMethod: TypeMoq.Mock<Function>;
+	let mockTree: TypeMoq.IMock<Tree>;
+	let mockRefreshTreeMethod: TypeMoq.IMock<Function>;
 	let capabilitiesService = new TestCapabilitiesService();
 
 	setup(() => {
 		let instantiationService = new TestInstantiationService();
-		let mockConnectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Strict, {}, {}, new TestStorageService());
+		let mockConnectionManagementService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Strict, true, {}, {}, new TestStorageService());
 		mockConnectionManagementService.setup(x => x.getConnectionGroups()).returns(x => []);
 		mockConnectionManagementService.setup(x => x.hasRegisteredServers()).returns(() => true);
 		serverTreeView = new ServerTreeView(mockConnectionManagementService.object, instantiationService, undefined, undefined, undefined, undefined, capabilitiesService);

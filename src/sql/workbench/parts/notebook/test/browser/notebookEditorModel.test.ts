@@ -64,9 +64,9 @@ suite('Notebook Editor Model', function (): void {
 	let defaultModelOptions: INotebookModelOptions;
 	const logService = new NullLogService();
 	const notificationService = TypeMoq.Mock.ofType(TestNotificationService, TypeMoq.MockBehavior.Loose);
-	let memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, '');
+	let memento = TypeMoq.Mock.ofType(Memento, TypeMoq.MockBehavior.Loose, true, '');
 	memento.setup(x => x.getMemento(TypeMoq.It.isAny())).returns(() => void 0);
-	const queryConnectionService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, memento.object, undefined, new TestStorageService());
+	const queryConnectionService = TypeMoq.Mock.ofType(ConnectionManagementService, TypeMoq.MockBehavior.Loose, true, memento.object, undefined, new TestStorageService());
 	queryConnectionService.callBase = true;
 	const capabilitiesService = TypeMoq.Mock.ofType(TestCapabilitiesService);
 	const configurationService = new TestConfigurationService();
@@ -91,8 +91,8 @@ suite('Notebook Editor Model', function (): void {
 		}, undefined, undefined);
 	});
 
-	let mockNotebookService: TypeMoq.Mock<NotebookService>;
-	mockNotebookService = TypeMoq.Mock.ofType(NotebookService, undefined, new TestLifecycleService(), undefined, undefined, undefined, instantiationService, new MockContextKeyService(),
+	let mockNotebookService: TypeMoq.IMock<NotebookService>;
+	mockNotebookService = TypeMoq.Mock.ofType(NotebookService, TypeMoq.MockBehavior.Loose, true, new TestLifecycleService(), undefined, undefined, undefined, instantiationService, new MockContextKeyService(),
 		undefined, undefined, undefined, undefined, undefined, undefined, TestEnvironmentService);
 
 	mockNotebookService.setup(s => s.findNotebookEditor(TypeMoq.It.isAny())).returns(() => {

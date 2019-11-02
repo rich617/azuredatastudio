@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as assert from 'assert';
-import { Mock, It, Times, MockBehavior } from 'typemoq';
+import { Mock, IMock, It, Times, MockBehavior } from 'typemoq';
 import * as azdata from 'azdata';
 import { ExtHostModelView } from 'sql/workbench/api/common/extHostModelView';
 import { MainThreadModelViewShape } from 'sql/workbench/api/common/sqlExtHost.protocol';
@@ -21,7 +21,7 @@ interface IWithItemConfig {
 
 suite('ExtHostModelView Validation Tests', () => {
 	let extHostModelView: ExtHostModelView;
-	let mockProxy: Mock<MainThreadModelViewShape>;
+	let mockProxy: IMock<MainThreadModelViewShape>;
 	let modelView: azdata.ModelView;
 	let inputBox: azdata.InputBoxComponent;
 	let validText = 'valid';

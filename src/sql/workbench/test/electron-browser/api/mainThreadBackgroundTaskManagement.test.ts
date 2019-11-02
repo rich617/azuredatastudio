@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 import * as azdata from 'azdata';
-import { Mock, It, Times } from 'typemoq';
+import { Mock, IMock, It, Times } from 'typemoq';
 import { MainThreadBackgroundTaskManagement, TaskStatus } from 'sql/workbench/api/browser/mainThreadBackgroundTaskManagement';
 import { ITaskService } from 'sql/platform/tasks/common/tasksService';
 import { IExtHostContext } from 'vs/workbench/api/common/extHost.protocol';
@@ -14,8 +14,8 @@ import { ExtHostBackgroundTaskManagementShape } from 'sql/workbench/api/common/s
 
 suite('MainThreadBackgroundTaskManagement Tests', () => {
 	let mainThreadBackgroundTaskManagement: MainThreadBackgroundTaskManagement;
-	let mockProxy: Mock<ExtHostBackgroundTaskManagementShape>;
-	let taskService: Mock<ITaskService>;
+	let mockProxy: IMock<ExtHostBackgroundTaskManagementShape>;
+	let taskService: IMock<ITaskService>;
 	let nothing: void;
 	let operationId = 'operation is';
 	let onTaskComplete = new Emitter<TaskNode>();

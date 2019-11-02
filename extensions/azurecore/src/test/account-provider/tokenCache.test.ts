@@ -3,7 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as os from 'os';
 import * as adal from 'adal-node';
 import * as path from 'path';
@@ -28,9 +28,9 @@ describe('AccountProvider.TokenCache', function (): void {
 		credentialProvider.saveCredential(tokenCacheKey, undefined);
 		const tokenCache = new CredentialServiceTokenCache(credentialProvider, tokenCacheKey, tokenCachePath);
 		const addResult = await tokenCache.addThenable([tokenResponse]);
-		should(addResult).true('TokenResponse not added correctly');
+		assert(addResult, 'TokenResponse not added correctly');
 
 		const results = await tokenCache.findThenable({ tokenType: 'testTokenType' });
-		should(results).deepEqual([tokenResponse]);
+		assert.deepEqual(results, [tokenResponse]);
 	});
 });

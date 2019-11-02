@@ -3,9 +3,8 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
-import * as vscode from 'vscode';
 import * as assert from 'assert';
+import * as vscode from 'vscode';
 import * as path from 'path';
 import 'mocha';
 
@@ -45,18 +44,18 @@ describe('Notebook Extension Python Installation', function () {
 	});
 
 	it('Verify Python Installation', async function () {
-		should(installComplete).be.true('Python setup did not complete.');
+		assert(installComplete, 'Python setup did not complete.');
 		let apiWrapper = jupyterController.jupyterInstallation.apiWrapper;
 		let jupyterPath = JupyterServerInstallation.getPythonInstallPath(apiWrapper);
 
 		console.log(`Expected python path: '${pythonInstallDir}'; actual: '${jupyterPath}'`);
-		should(jupyterPath).be.equal(pythonInstallDir);
-		should(JupyterServerInstallation.isPythonInstalled(apiWrapper)).be.true();
-		should(JupyterServerInstallation.getExistingPythonSetting(apiWrapper)).be.false();
+		assert.equal(jupyterPath, pythonInstallDir);
+		assert(JupyterServerInstallation.isPythonInstalled(apiWrapper));
+		assert(!JupyterServerInstallation.getExistingPythonSetting(apiWrapper));
 	});
 
 	it('Use Existing Python Installation', async function () {
-		should(installComplete).be.true('Python setup did not complete.');
+		assert(installComplete, 'Python setup did not complete.');
 
 		console.log('Uninstalling existing pip dependencies');
 		let install = jupyterController.jupyterInstallation;
@@ -69,16 +68,16 @@ describe('Notebook Extension Python Installation', function () {
 		let existingPythonPath = path.join(pythonInstallDir, pythonBundleVersion);
 		await install.startInstallProcess(false, { installPath: existingPythonPath, existingPython: true });
 		let apiWrapper = install.apiWrapper;
-		should(JupyterServerInstallation.isPythonInstalled(apiWrapper)).be.true();
-		should(JupyterServerInstallation.getPythonInstallPath(apiWrapper)).be.equal(existingPythonPath);
-		should(JupyterServerInstallation.getExistingPythonSetting(apiWrapper)).be.true();
+		assert(JupyterServerInstallation.isPythonInstalled(apiWrapper));
+		assert.equal(JupyterServerInstallation.getPythonInstallPath(apiWrapper), existingPythonPath);
+		assert(JupyterServerInstallation.getExistingPythonSetting(apiWrapper));
 
 		// Redo "new" install to restore original settings.
 		// The actual install should get skipped since it already exists.
 		await install.startInstallProcess(false, { installPath: pythonInstallDir, existingPython: false });
-		should(JupyterServerInstallation.isPythonInstalled(apiWrapper)).be.true();
-		should(JupyterServerInstallation.getPythonInstallPath(apiWrapper)).be.equal(pythonInstallDir);
-		should(JupyterServerInstallation.getExistingPythonSetting(apiWrapper)).be.false();
+		assert(JupyterServerInstallation.isPythonInstalled(apiWrapper));
+		assert.equal(JupyterServerInstallation.getPythonInstallPath(apiWrapper), pythonInstallDir);
+		assert(!JupyterServerInstallation.getExistingPythonSetting(apiWrapper));
 		console.log('Existing Python Installation is done');
 	});
 
@@ -89,17 +88,17 @@ describe('Notebook Extension Python Installation', function () {
 		let testPkgVersion = '0.24.2';
 		let expectedPkg: PythonPkgDetails = { name: testPkg, version: testPkgVersion };
 
-		await install.installPipPackages([{ name: testPkg, version: testPkgVersion}], false);
+		await install.installPipPackages([{ name: testPkg, version: testPkgVersion }], false);
 		let packages = await install.getInstalledPipPackages();
-		should(packages).containEql(expectedPkg);
+		assert(packages.includes(expectedPkg));
 
-		await install.uninstallPipPackages([{ name: testPkg, version: testPkgVersion}]);
+		await install.uninstallPipPackages([{ name: testPkg, version: testPkgVersion }]);
 		packages = await install.getInstalledPipPackages();
-		should(packages).not.containEql(expectedPkg);
+		assert(!packages.includes(expectedPkg));
 
-		await install.installPipPackages([{ name: testPkg, version: testPkgVersion}], false);
+		await install.installPipPackages([{ name: testPkg, version: testPkgVersion }], false);
 		packages = await install.getInstalledPipPackages();
-		should(packages).containEql(expectedPkg);
+		assert(packages.includes(expectedPkg));
 	});
 
 	it('Conda Install Utilities Test', async function () {
@@ -107,13 +106,13 @@ describe('Notebook Extension Python Installation', function () {
 
 		// Anaconda is not included in our Python package, so all
 		// the conda utilities should fail.
-		should(install.usingConda).be.false();
+		assert(!install.usingConda);
 
-		should(install.getInstalledCondaPackages()).be.rejected();
+		assert.rejects(install.getInstalledCondaPackages());
 
-		should(install.installCondaPackages([{ name: 'pandas', version: '0.24.2' }], false)).be.rejected();
+		assert.rejects(install.installCondaPackages([{ name: 'pandas', version: '0.24.2' }], false));
 
-		should(install.uninstallCondaPackages([{ name: 'pandas', version: '0.24.2' }])).be.rejected();
+		assert.rejects(install.uninstallCondaPackages([{ name: 'pandas', version: '0.24.2' }]));
 	});
 
 	it('Manage Packages Dialog: Sort Versions Test', async function () {
@@ -122,12 +121,12 @@ describe('Notebook Extension Python Installation', function () {
 		let descendingVersions = ['100', '3', '1.1', '1.0.0', '0.3', '0.0.5', '0.0.0.9'];
 
 		let actualVersions = sortPackageVersions(testVersions);
-		should(actualVersions).be.deepEqual(ascendingVersions);
+		assert.deepEqual(actualVersions, ascendingVersions);
 
 		actualVersions = sortPackageVersions(testVersions, true);
-		should(actualVersions).be.deepEqual(ascendingVersions);
+		assert.deepEqual(actualVersions, ascendingVersions);
 
 		actualVersions = sortPackageVersions(testVersions, false);
-		should(actualVersions).be.deepEqual(descendingVersions);
+		assert.deepEqual(actualVersions, descendingVersions);
 	});
 });

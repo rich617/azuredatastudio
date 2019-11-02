@@ -23,9 +23,9 @@ import { TestInstantiationService } from 'vs/platform/instantiation/test/common/
 suite('MainThreadNotebook Tests', () => {
 
 	let mainThreadNotebook: MainThreadNotebook;
-	let mockProxy: TypeMoq.Mock<ExtHostNotebookShape>;
+	let mockProxy: TypeMoq.IMock<ExtHostNotebookShape>;
 	let notebookUri: URI;
-	let mockNotebookService: TypeMoq.Mock<NotebookService>;
+	let mockNotebookService: TypeMoq.IMock<NotebookService>;
 	let providerId = 'TestProvider';
 
 	setup(() => {
@@ -34,7 +34,7 @@ suite('MainThreadNotebook Tests', () => {
 			getProxy: proxyType => mockProxy.object
 		};
 		const instantiationService = new TestInstantiationService();
-		mockNotebookService = TypeMoq.Mock.ofType(NotebookService, undefined, new TestLifecycleService(), undefined, undefined, undefined, instantiationService, new MockContextKeyService(),
+		mockNotebookService = TypeMoq.Mock.ofType(NotebookService, TypeMoq.MockBehavior.Loose, true, new TestLifecycleService(), undefined, undefined, undefined, instantiationService, new MockContextKeyService(),
 			undefined, undefined, undefined, undefined, undefined, undefined, TestEnvironmentService);
 		notebookUri = URI.parse('file:/user/default/my.ipynb');
 		mainThreadNotebook = new MainThreadNotebook(extContext, mockNotebookService.object, instantiationService);

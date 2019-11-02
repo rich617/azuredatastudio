@@ -5,7 +5,7 @@
 'use strict';
 
 import 'mocha';
-import * as should from 'should';
+import * as assert from 'assert';
 import { AgentSubSystem } from 'azdata';
 import { JobStepDialog } from '../../dialogs/jobStepDialog';
 import { JobStepData } from '../../data/jobStepData';
@@ -25,7 +25,7 @@ describe('Agent extension enum mapping sanity test', function (): void {
 		for (let i = 0; i < subSytems.length; i++) {
 			let subSystem = subSytems[i];
 			let convertedSubSystemName = JobStepData.convertToSubSystemDisplayName(subSystem);
-			should.equal(convertedSubSystemName, subSystemDisplayNames[i]);
+			assert.equal(convertedSubSystemName, subSystemDisplayNames[i]);
 		}
 	});
 
@@ -33,7 +33,7 @@ describe('Agent extension enum mapping sanity test', function (): void {
 		for (let i = 0; i < subSystemDisplayNames.length; i++) {
 			let subSystemDisplayName = subSystemDisplayNames[i];
 			let convertedSubSystem = JobStepData.convertToAgentSubSystem(subSystemDisplayName);
-			should.equal(convertedSubSystem, subSytems[i]);
+			assert.equal(convertedSubSystem, subSytems[i]);
 		}
 	});
 });

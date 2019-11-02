@@ -21,7 +21,7 @@ suite('Advanced options helper tests', () => {
 	let defaultGroupOption: azdata.ServiceOption;
 	let isValid: boolean;
 	let inputValue: string;
-	let inputBox: TypeMoq.Mock<InputBox>;
+	let inputBox: TypeMoq.IMock<InputBox>;
 
 	let optionsMap: { [optionName: string]: OptionsDialogHelper.IOptionElement };
 
@@ -97,7 +97,7 @@ suite('Advanced options helper tests', () => {
 			isArray: undefined
 		};
 
-		inputBox = TypeMoq.Mock.ofType(InputBox, TypeMoq.MockBehavior.Loose, $('div'), null, null);
+		inputBox = TypeMoq.Mock.ofType(InputBox, TypeMoq.MockBehavior.Loose, true, $('div'), null, null);
 		inputBox.callBase = true;
 		inputBox.setup(x => x.validate()).returns(() => isValid);
 		inputBox.setup(x => x.value).returns(() => inputValue);

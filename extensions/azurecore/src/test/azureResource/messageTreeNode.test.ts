@@ -3,9 +3,7 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as should from 'should';
+import * as assert from 'assert';
 import * as vscode from 'vscode';
 import 'mocha';
 
@@ -17,18 +15,18 @@ describe('AzureResourceMessageTreeNode.info', function(): void {
 		const mockMessage = 'Test messagse';
 		const treeNode = new AzureResourceMessageTreeNode(mockMessage, undefined);
 
-		should(treeNode.nodePathValue).startWith('message_');
+		assert(treeNode.nodePathValue.startsWith('message_'));
 
 		const treeItem = await treeNode.getTreeItem();
-		should(treeItem.label).equal(mockMessage);
-		should(treeItem.contextValue).equal(AzureResourceItemType.message);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.None);
+		assert.equal(treeItem.label, mockMessage);
+		assert.equal(treeItem.contextValue, AzureResourceItemType.message);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.None);
 
 		const nodeInfo = treeNode.getNodeInfo();
-		should(nodeInfo.isLeaf).true();
-		should(nodeInfo.label).equal(mockMessage);
-		should(nodeInfo.nodeType).equal(AzureResourceItemType.message);
-		should(nodeInfo.iconType).equal(AzureResourceItemType.message);
+		assert(nodeInfo.isLeaf);
+		assert.equal(nodeInfo.label, mockMessage);
+		assert.equal(nodeInfo.nodeType, AzureResourceItemType.message);
+		assert.equal(nodeInfo.iconType, AzureResourceItemType.message);
 	});
 });
 
@@ -36,6 +34,6 @@ describe('AzureResourceMessageTreeNode.create', function(): void {
 	it('Should create a message node.', async function(): Promise<void> {
 		const mockMessage = 'Test messagse';
 		const treeNode = AzureResourceMessageTreeNode.create(mockMessage, undefined);
-		should(treeNode).instanceof(AzureResourceMessageTreeNode);
+		assert(treeNode instanceof AzureResourceMessageTreeNode);
 	});
 });

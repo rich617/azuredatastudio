@@ -335,7 +335,7 @@ suite('Cell Model', function (): void {
 	});
 
 	suite('Model Future handling', function (): void {
-		let future: TypeMoq.Mock<EmptyFuture>;
+		let future: TypeMoq.IMock<EmptyFuture>;
 		let cell: ICellModel;
 		const stdInDefaultMessage: nb.IStdinMessage = {
 			channel: 'stdin',

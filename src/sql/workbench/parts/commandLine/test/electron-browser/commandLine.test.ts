@@ -126,14 +126,14 @@ suite('commandLineService tests', () => {
 		);
 	}
 
-	function getConfigurationServiceMock(showConnectDialogOnStartup: boolean): TypeMoq.Mock<IConfigurationService> {
+	function getConfigurationServiceMock(showConnectDialogOnStartup: boolean): TypeMoq.IMock<IConfigurationService> {
 		let configurationService = TypeMoq.Mock.ofType<IConfigurationService>(TestConfigurationService);
 		configurationService.setup((c) => c.getValue(TypeMoq.It.isAnyString())).returns((config: string) => showConnectDialogOnStartup);
 		return configurationService;
 	}
 
 	test('processCommandLine shows connection dialog by default', done => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		connectionManagementService.setup((c) => c.showConnectionDialog())
@@ -152,7 +152,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine does nothing if no server name and command name is provided and the configuration \'workbench.showConnectDialogOnStartup\' is set to false, even if registered servers exist', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		connectionManagementService.setup((c) => c.showConnectionDialog()).verifiable(TypeMoq.Times.never());
@@ -167,7 +167,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine does nothing if registered servers exist and no server name is provided', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		connectionManagementService.setup((c) => c.showConnectionDialog()).verifiable(TypeMoq.Times.never());
@@ -186,7 +186,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine opens a new connection if a server name is passed', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		const args: TestParsedArgs = new TestParsedArgs();
@@ -212,9 +212,9 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine invokes a command without a profile parameter when no server is passed', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Loose);
-		const commandService: TypeMoq.Mock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
+		const commandService: TypeMoq.IMock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
 		const args: TestParsedArgs = new TestParsedArgs();
 
 		args.command = 'mycommand';
@@ -240,10 +240,10 @@ suite('commandLineService tests', () => {
 
 	test('processCommandLine invokes a command with a profile parameter when a server is passed', async () => {
 
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
-		const commandService: TypeMoq.Mock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
+		const commandService: TypeMoq.IMock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
 		const args: TestParsedArgs = new TestParsedArgs();
 		args.command = 'mycommand';
 		args.server = 'myserver';
@@ -276,9 +276,9 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine rejects unknown commands', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
-		const commandService: TypeMoq.Mock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
+		const commandService: TypeMoq.IMock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
 		const args: TestParsedArgs = new TestParsedArgs();
 
 		args.command = 'mycommand';
@@ -292,7 +292,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine uses Integrated auth if no user name or auth type is passed', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		const args: TestParsedArgs = new TestParsedArgs();
@@ -317,7 +317,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine reuses saved connections that match args', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 		let connection = new ConnectionProfile(capabilitiesService, {
@@ -360,7 +360,7 @@ suite('commandLineService tests', () => {
 	});
 
 	test('processCommandLine connects opened query files to given server', async () => {
-		const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+		const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 			= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 		const args: TestParsedArgs = new TestParsedArgs();
 		args.server = 'myserver';
@@ -378,13 +378,13 @@ suite('commandLineService tests', () => {
 			}).verifiable(TypeMoq.Times.once());
 		connectionManagementService.setup(c => c.getConnectionProfileById(TypeMoq.It.isAnyString())).returns(() => originalProfile);
 		const configurationService = getConfigurationServiceMock(true);
-		const queryInput: TypeMoq.Mock<QueryInput> = TypeMoq.Mock.ofType<QueryInput>(QueryInput);
+		const queryInput: TypeMoq.IMock<QueryInput> = TypeMoq.Mock.ofType<QueryInput>(QueryInput);
 		let uri = URI.file(args._[0]);
 		const queryState = new QueryEditorState();
 		queryState.connected = true;
 		queryInput.setup(q => q.state).returns(() => queryState);
 		queryInput.setup(q => q.getResource()).returns(() => uri).verifiable(TypeMoq.Times.once());
-		const editorService: TypeMoq.Mock<IEditorService> = TypeMoq.Mock.ofType<IEditorService>(TestEditorService, TypeMoq.MockBehavior.Strict);
+		const editorService: TypeMoq.IMock<IEditorService> = TypeMoq.Mock.ofType<IEditorService>(TestEditorService, TypeMoq.MockBehavior.Strict);
 		editorService.setup(e => e.editors).returns(() => [queryInput.object]);
 		connectionManagementService.setup(c =>
 			c.connect(TypeMoq.It.is<ConnectionProfile>(p => p.serverName === 'myserver' && p.authenticationType === Constants.sqlLogin),
@@ -399,7 +399,7 @@ suite('commandLineService tests', () => {
 
 	suite('URL Handler', () => {
 
-		let dialogService: TypeMoq.Mock<TestDialogService>;
+		let dialogService: TypeMoq.IMock<TestDialogService>;
 
 		setup(() => {
 			dialogService = TypeMoq.Mock.ofType(TestDialogService);
@@ -410,7 +410,7 @@ suite('commandLineService tests', () => {
 			// Given a URI pointing to a server
 			let uri: URI = URI.parse('azuredatastudio://file?server=myserver&database=mydatabase&user=myuser');
 
-			const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+			const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 				= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 			const configurationService = getConfigurationServiceMock(true);
 			const logService = new NullLogService();
@@ -428,7 +428,7 @@ suite('commandLineService tests', () => {
 			// Given a URI pointing to a server
 			let uri: URI = URI.parse('azuredatastudio://connect?server=myserver&database=mydatabase&user=myuser');
 
-			const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+			const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 				= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 			connectionManagementService.setup((c) => c.showConnectionDialog()).verifiable(TypeMoq.Times.never());
@@ -459,7 +459,7 @@ suite('commandLineService tests', () => {
 			// Given a URI pointing to a server
 			let uri: URI = URI.parse('azuredatastudio://connect?server=myserver&database=mydatabase&user=myuser');
 
-			const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+			const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 				= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
 
 			connectionManagementService.setup((c) => c.showConnectionDialog()).verifiable(TypeMoq.Times.never());
@@ -491,9 +491,9 @@ suite('commandLineService tests', () => {
 			// Given I pass a command
 			let uri: URI = URI.parse('azuredatastudio://connect?command=mycommand');
 
-			const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+			const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 				= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
-			const commandService: TypeMoq.Mock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
+			const commandService: TypeMoq.IMock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
 
 			connectionManagementService.setup(c => c.hasRegisteredServers()).returns(() => true);
 			commandService.setup(c => c.executeCommand('mycommand'))
@@ -519,9 +519,9 @@ suite('commandLineService tests', () => {
 			// Given I pass a command
 			let uri: URI = URI.parse('azuredatastudio://connect?command=mycommand&server=myserver&database=mydatabase&user=myuser');
 
-			const connectionManagementService: TypeMoq.Mock<IConnectionManagementService>
+			const connectionManagementService: TypeMoq.IMock<IConnectionManagementService>
 				= TypeMoq.Mock.ofType<IConnectionManagementService>(TestConnectionManagementService, TypeMoq.MockBehavior.Strict);
-			const commandService: TypeMoq.Mock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
+			const commandService: TypeMoq.IMock<ICommandService> = TypeMoq.Mock.ofType<ICommandService>(TestCommandService);
 
 			connectionManagementService.setup((c) => c.showConnectionDialog()).verifiable(TypeMoq.Times.never());
 			connectionManagementService.setup(c => c.hasRegisteredServers()).returns(() => true).verifiable(TypeMoq.Times.atMostOnce());

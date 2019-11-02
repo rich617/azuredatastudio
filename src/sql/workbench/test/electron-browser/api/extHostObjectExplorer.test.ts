@@ -65,7 +65,7 @@ const nodes: { [nodeName: string]: azdata.NodeInfo } =
 };
 
 suite('ExtHostObjectExplorer Tests', () => {
-	let mockProxy: TypeMoq.Mock<MainThreadObjectExplorerShape>;
+	let mockProxy: TypeMoq.IMock<MainThreadObjectExplorerShape>;
 	suiteSetup(() => {
 		mockProxy = TypeMoq.Mock.ofInstance(<MainThreadObjectExplorerShape>{
 			$getNode: (connectionId: string, nodePath?: string): Thenable<azdata.NodeInfo> => undefined

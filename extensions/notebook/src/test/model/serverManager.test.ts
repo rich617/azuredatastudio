@@ -3,12 +3,12 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import * as vscode from 'vscode';
 import 'mocha';
 
-import { JupyterServerInstanceStub } from '../common';
+import { JupyterServerInstanceStub, isUndefinedOrNull } from '../common';
 import { LocalJupyterServerManager, ServerInstanceFactory } from '../../jupyter/jupyterServerManager';
 import { JupyterServerInstallation } from '../../jupyter/jupyterServerInstallation';
 import { Deferred } from '../../common/promise';
@@ -46,8 +46,8 @@ describe('Local Jupyter Server Manager', function (): void {
 	});
 
 	it('Should not be started initially', function (): void {
-		should(serverManager.isStarted).be.false();
-		should(serverManager.serverSettings).be.undefined();
+		assert(!serverManager.isStarted);
+		assert(isUndefinedOrNull(serverManager.serverSettings));
 	});
 
 	it('Should show error message on install failure', async function (): Promise<void> {
@@ -68,10 +68,10 @@ describe('Local Jupyter Server Manager', function (): void {
 		await serverManager.startServer();
 
 		// Then I expect the port to be included in settings
-		should(serverManager.serverSettings.baseUrl.indexOf('1234') > -1).be.true();
-		should(serverManager.serverSettings.token).equal('abcdefghijk');
+		assert(serverManager.serverSettings.baseUrl.indexOf('1234') > -1);
+		assert.equal(serverManager.serverSettings.token, 'abcdefghijk');
 		// And a notification to be sent
-		should(notified).be.true();
+		assert(notified);
 		// And the key methods to have been called
 		mockServerInstance.verify(s => s.configure(), TypeMoq.Times.once());
 		mockServerInstance.verify(s => s.start(), TypeMoq.Times.once());
@@ -105,7 +105,7 @@ describe('Local Jupyter Server Manager', function (): void {
 
 		// When I start and then dispose the extension
 		await serverManager.startServer();
-		should(mockExtensionContext.subscriptions).have.length(1);
+		assert.equal(mockExtensionContext.subscriptions.length, 1);
 		mockExtensionContext.subscriptions[0].dispose();
 
 		// Then I expect stop to have been called on the server instance

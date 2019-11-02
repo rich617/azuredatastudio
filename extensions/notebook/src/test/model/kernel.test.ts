@@ -3,15 +3,13 @@
  *  Licensed under the Source EULA. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-'use strict';
-
-import * as should from 'should';
+import * as assert from 'assert';
 import * as TypeMoq from 'typemoq';
 import { nb } from 'azdata';
 import { Kernel, KernelMessage } from '@jupyterlab/services';
 import 'mocha';
 
-import { KernelStub, FutureStub } from '../common';
+import { KernelStub, FutureStub, isUndefinedOrNull } from '../common';
 import { JupyterKernel, JupyterFuture } from '../../jupyter/jupyterKernel';
 
 describe('Jupyter Session', function (): void {
@@ -31,9 +29,9 @@ describe('Jupyter Session', function (): void {
 		let readyPromise = Promise.reject('err');
 		mockJupyterKernel.setup(s => s.ready).returns(() => readyPromise);
 		// Should return those values when called
-		should(kernel.id).equal('id');
-		should(kernel.name).equal('name');
-		should(kernel.isReady).be.true();
+		assert.equal(kernel.id, 'id');
+		assert.equal(kernel.name, 'name');
+		assert(kernel.isReady);
 
 		kernel.ready.then((fulfilled) => done('Err: should not succeed'), (err) => done());
 	});
@@ -49,12 +47,12 @@ describe('Jupyter Session', function (): void {
 		mockJupyterKernel.setup(k => k.getSpec()).returns(() => Promise.resolve(spec));
 
 		let actualSpec = await kernel.getSpec();
-		should(actualSpec.name).equal('python');
-		should(actualSpec.display_name).equal('Python 3');
+		assert.equal(actualSpec.name, 'python');
+		assert.equal(actualSpec.display_name, 'Python 3');
 	});
 
 	it('should return code completions on requestComplete', async function (): Promise<void> {
-		should(kernel.supportsIntellisense).be.true();
+		assert(kernel.supportsIntellisense);
 		let completeMsg: KernelMessage.ICompleteReplyMsg = {
 			channel: 'shell',
 			content: {
@@ -74,8 +72,8 @@ describe('Jupyter Session', function (): void {
 			code: 'pr',
 			cursor_pos: 2
 		});
-		should(msg.type).equal('shell');
-		should(msg.content).equal(completeMsg.content);
+		assert.equal(msg.type, 'shell');
+		assert.equal(msg.content, completeMsg.content);
 	});
 
 	it('should return a simple future on requestExecute', async function (): Promise<void> {
@@ -103,11 +101,11 @@ describe('Jupyter Session', function (): void {
 		}, true);
 
 		// Then expect wrapper to be returned
-		should(future).be.instanceof(JupyterFuture);
-		should(future.msg.type).equal('shell');
-		should(future.msg.content.code).equal(code);
-		should(executeRequest.code).equal(code);
-		should(shouldDispose).be.true();
+		assert(future instanceof JupyterFuture);
+		assert.equal(future.msg.type, 'shell');
+		assert.equal(future.msg.content.code, code);
+		assert.equal(executeRequest.code, code);
+		assert(shouldDispose);
 	});
 
 });
@@ -133,7 +131,7 @@ describe('Jupyter Future', function (): void {
 		mockJupyterFuture.setup(f => f.done).returns(() => Promise.resolve(msg));
 
 		let actualMsg = await future.done;
-		should(actualMsg.content.code).equal('exec');
+		assert.equal(actualMsg.content.code, 'exec');
 	});
 
 	it('should relay reply message', async function (): Promise<void> {
@@ -147,9 +145,8 @@ describe('Jupyter Future', function (): void {
 				msg = message;
 			})
 		});
-		should(handler).not.be.undefined();
+		assert(!isUndefinedOrNull(handler));
 		verifyRelayMessage('shell', handler, () => msg);
-
 	});
 
 	it('should relay StdIn message', async function (): Promise<void> {
@@ -163,7 +160,7 @@ describe('Jupyter Future', function (): void {
 				msg = message;
 			})
 		});
-		should(handler).not.be.undefined();
+		assert(!isUndefinedOrNull(handler));
 		verifyRelayMessage('stdin', handler, () => msg);
 	});
 
@@ -178,7 +175,7 @@ describe('Jupyter Future', function (): void {
 				msg = message;
 			})
 		});
-		should(handler).not.be.undefined();
+		assert(!isUndefinedOrNull(handler));
 		verifyRelayMessage('iopub', handler, () => msg);
 	});
 
@@ -192,12 +189,10 @@ describe('Jupyter Future', function (): void {
 		});
 		let msg = getMessage();
 		// Then the value should be relayed
-		should(msg.type).equal(channel);
-		should(msg.content).have.property('value', 'test');
-		should(msg.metadata).have.property('value', 'test');
-		should(msg.header).have.property('username', 'test');
-		should(msg.parent_header).have.property('username', 'test');
+		assert.equal(msg.type, channel);
+		assert.equal(msg.content.value, 'test');
+		assert.equal(msg.metadata.value, 'test');
+		assert.equal(msg.header.username, 'test');
+		assert.equal(msg.parent_header.username, 'test');
 	}
-
 });
-

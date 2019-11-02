@@ -124,7 +124,7 @@ suite('Account picker view model tests', () => {
 	});
 });
 
-function getMockAccountManagementService(resolveProviders: boolean, resolveAccounts: boolean): TypeMoq.Mock<TestAccountManagementService> {
+function getMockAccountManagementService(resolveProviders: boolean, resolveAccounts: boolean): TypeMoq.IMock<TestAccountManagementService> {
 	let mockAccountManagementService = TypeMoq.Mock.ofType(TestAccountManagementService);
 
 	mockAccountManagementService.setup(x => x.getAccountProviderMetadata())

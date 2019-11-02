@@ -5,7 +5,7 @@
 
 'use strict';
 import * as TypeMoq from 'typemoq';
-import * as should from 'should';
+import * as assert from 'assert';
 import * as vscode from 'vscode';
 import 'mocha';
 import { AppContext } from '../../../appContext';
@@ -15,6 +15,7 @@ import { RegisteredServerTreeNode } from '../../../cmsResource/tree/registeredSe
 import { ICmsResourceTreeChangeHandler } from '../../../cmsResource/tree/treeChangeHandler';
 import { cmsResource } from '../../../cmsResource/cms-resource';
 import { CmsUtils } from '../../../cmsUtils';
+import { isUndefinedOrNull } from '../../types';
 
 // Mock services
 let mockAppContext: AppContext;
@@ -47,17 +48,17 @@ describe('RegisteredServerTreeNode.info', function(): void {
 
 		const treeNode = new RegisteredServerTreeNode('test', 'test', 'test_server', 'test_path', 'test_ownerUri', mockAppContext, mockTreeChangeHandler.object, null);
 
-		should(treeNode.relativePath).equal('test_path');
+		assert.equal(treeNode.relativePath, 'test_path');
 
 		const treeItem = await treeNode.getTreeItem();
-		should(treeItem.label).equal(label);
-		should(treeItem.contextValue).equal(CmsResourceItemType.registeredServer);
-		should(treeItem.collapsibleState).equal(vscode.TreeItemCollapsibleState.Collapsed);
-		should(treeItem.command).undefined();
+		assert.equal(treeItem.label, label);
+		assert.equal(treeItem.contextValue, CmsResourceItemType.registeredServer);
+		assert.equal(treeItem.collapsibleState, vscode.TreeItemCollapsibleState.Collapsed);
+		assert(isUndefinedOrNull(treeItem.command));
 
 		const nodeInfo = treeNode.getNodeInfo();
-		should(nodeInfo.isLeaf).false();
-		should(nodeInfo.label).equal(label);
-		should(nodeInfo.nodeType).equal(CmsResourceItemType.registeredServer);
+		assert(!nodeInfo.isLeaf);
+		assert.equal(nodeInfo.label, label);
+		assert.equal(nodeInfo.nodeType, CmsResourceItemType.registeredServer);
 	});
 });
